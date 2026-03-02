@@ -10,7 +10,7 @@ Aplicación para gestionar el mantenimiento de vehículos
 - PostgreSQL
 
 ## Estado del proyecto
-En desarrollo
+En desarrollo. Subida al repositorio la esquematica básica sobre la que trabajar el desarollo del proyecto
 
 ## Autor
 Alvaro Medina - 2ºDAM Prometeo FP
