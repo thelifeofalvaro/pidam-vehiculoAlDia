@@ -1,11 +1,14 @@
 -- Eliminar columnas innecesarias
 alter table usuarios drop column if exists email;
 alter table usuarios drop column if exists password_hash;
+
 -- Eliminar FK de Usuarios en Vehiculos
 ALTER TABLE vehiculos
 DROP CONSTRAINT vehiculos_usuario_id_fkey;
+
 -- Borrar Tabla Usuarios
 DROP TABLE usuarios;
+
 -- Crear Tabla Usuarios NUEVA
 CREATE TABLE usuarios (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -13,9 +16,70 @@ CREATE TABLE usuarios (
   rol rol_usuario DEFAULT 'usuario',
   fecha_registro TIMESTAMP DEFAULT NOW()
 );
+
 -- Rehacemos la relacion Usuarios - Vehiculos
 ALTER TABLE vehiculos
 ADD CONSTRAINT vehiculos_usuario_id_fkey
 FOREIGN KEY (usuario_id)
 REFERENCES usuarios(id)
 ON DELETE CASCADE;
+
+-- Trigger Para Actualizar Usuarios en las tablas nativas de Supabase y la creada
+create or replace function public.handle_new_user()
+returns trigger as $$
+begin
+  insert into public.usuarios (id)
+  values (new.id);
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
+
+-- Añadir restricciones UNIQUE a Matricula
+alter table vehiculos
+add constraint unique_matricula unique (matricula);
+
+-- Añadir restricciones UNIQUE a Bastidor
+alter table vehiculos
+add constraint unique_bastidor unique (bastidor);
+
+-- Trigger Actualización Km con cada intervención
+
+create or replace function actualizar_km()
+returns trigger as $$
+begin
+  update vehiculos
+  set km_vh = new.km_intervencion
+  where id = new.vehiculo_id;
+
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger actualizar_km_trigger
+after insert on intervenciones
+for each row
+execute procedure actualizar_km();
+
+-- Crear ENUM para tipo de Intervenciones
+CREATE TYPE tipo_intervencion_enum AS ENUM (
+  'reparación',
+  'modificación',
+  'mejora',
+  'revisión',
+  'otros'
+);
+-- Añadir columna a la tabla
+alter table intervenciones
+alter column tipo_intervencion
+type tipo_intervencion_enum
+using tipo_intervencion::tipo_intervencion_enum;
+
+-- Añadir ENUM para lugar de intervención
+CREATE TYPE lugar_enum AS ENUM ('casa', 'taller');
+
+alter table intervenciones
+add column lugar lugar_enum;
