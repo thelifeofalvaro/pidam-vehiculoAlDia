@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../data/repositories/vehicle_repository.dart';
+import '../../data/models/vehicle_model.dart';
 
 class VehicleItem {
   const VehicleItem({
@@ -12,26 +14,78 @@ class VehicleItem {
   final String km;
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.vehicles = const []});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   static const Color _screenBackground = Color(0xFFEAEAEA);
 
-  final List<VehicleItem> vehicles;
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final VehicleRepository _repository = VehicleRepository();
+
+  List<VehicleItem> vehicles = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadVehicles();
+  }
+
+  Future<void> loadVehicles() async {
+    try {
+      print('🔄 Cargando vehículos en HOME...');
+
+      final data = await _repository.getVehicles();
+
+      print('✅ Datos crudos: $data');
+
+      final mapped = data.map((v) {
+        return VehicleItem(
+          brandModel: '${v.marca ?? ''} ${v.modelo ?? ''}',
+          plate: v.matricula ?? 'Sin matrícula',
+          km: v.kmVh != null ? '${v.kmVh} km' : 'Sin km',
+        );
+      }).toList();
+
+      setState(() {
+        vehicles = mapped;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('❌ ERROR HOME: $e');
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _goToCreate() async {
+    final result = await Navigator.pushNamed(context, '/vehicle-manage');
+
+    if (result == true) {
+      loadVehicles(); // 🔥 recarga al volver
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final bool hasVehicles = vehicles.isNotEmpty;
 
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
-      backgroundColor: _screenBackground,
+      backgroundColor: HomeScreen._screenBackground,
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: hasVehicles
-                  ? _HomeWithData(vehicles: vehicles)
-                  : const _HomeEmptyState(),
+                  ? _HomeWithData(vehicles: vehicles, onAddVehicle: _goToCreate)
+                  : _HomeEmptyState(onAddVehicle: _goToCreate),
             ),
             const _BottomTabBar(),
           ],
@@ -42,7 +96,9 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _HomeEmptyState extends StatelessWidget {
-  const _HomeEmptyState();
+  const _HomeEmptyState({required this.onAddVehicle});
+
+  final VoidCallback onAddVehicle;
 
   static const Color _primaryBlue = Color(0xFF0047AB);
   static const Color _actionOrange = Color(0xFFFF8C00);
@@ -113,13 +169,7 @@ class _HomeEmptyState extends StatelessWidget {
                     width: 206,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Próximamente: añadir vehículo'),
-                          ),
-                        );
-                      },
+                      onPressed: onAddVehicle,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _actionOrange,
                         foregroundColor: _carbonBlack,
@@ -151,7 +201,10 @@ class _HomeEmptyState extends StatelessWidget {
 }
 
 class _HomeWithData extends StatelessWidget {
-  const _HomeWithData({required this.vehicles});
+  const _HomeWithData({required this.vehicles, required this.onAddVehicle});
+
+  final List<VehicleItem> vehicles;
+  final VoidCallback onAddVehicle;
 
   static const Color _primaryBlue = Color(0xFF0047AB);
   static const Color _actionOrange = Color(0xFFFF8C00);
@@ -161,8 +214,6 @@ class _HomeWithData extends StatelessWidget {
 
   static const String _carCardImageUrl =
       'https://www.figma.com/api/mcp/asset/49c5018a-4aa6-4777-adc1-d3bf83796122';
-
-  final List<VehicleItem> vehicles;
 
   @override
   Widget build(BuildContext context) {
@@ -287,13 +338,7 @@ class _HomeWithData extends StatelessWidget {
             width: 56,
             height: 56,
             child: FloatingActionButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Próximamente: añadir vehículo'),
-                  ),
-                );
-              },
+              onPressed: onAddVehicle,
               backgroundColor: _actionOrange,
               foregroundColor: _carbonBlack,
               elevation: 0,
