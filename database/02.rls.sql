@@ -19,6 +19,12 @@ ON usuarios
 FOR INSERT
 WITH CHECK (auth.uid() = id);
 
+-- El usuario puede actualizar su perfil
+CREATE POLICY "Usuario actualiza su perfil"
+ON usuarios
+FOR UPDATE
+USING (auth.uid() = id);
+
 -- =========================
 -- VEHICULOS
 -- =========================
@@ -39,7 +45,8 @@ WITH CHECK (auth.uid() = usuario_id);
 CREATE POLICY "Actualizar vehiculos propios"
 ON vehiculos
 FOR UPDATE
-USING (auth.uid() = usuario_id);
+USING (auth.uid() = usuario_id)
+WITH CHECK (auth.uid() = usuario_id);
 
 -- Eliminar solo propios
 CREATE POLICY "Eliminar vehiculos propios"
@@ -57,9 +64,9 @@ ON intervenciones
 FOR SELECT
 USING (
   EXISTS (
-    SELECT 1 FROM vehiculos
-    WHERE vehiculos.id = intervenciones.vehiculo_id
-    AND vehiculos.usuario_id = auth.uid()
+    SELECT 1 FROM vehiculos v
+    WHERE v.id = intervenciones.vehiculo_id
+    AND v.usuario_id = auth.uid()
   )
 );
 
@@ -69,23 +76,23 @@ ON intervenciones
 FOR INSERT
 WITH CHECK (
   EXISTS (
-    SELECT 1 FROM vehiculos
-    WHERE vehiculos.id = vehiculo_id
-    AND vehiculos.usuario_id = auth.uid()
+    SELECT 1 FROM vehiculos v
+    WHERE v.id = vehiculo_id
+    AND v.usuario_id = auth.uid()
   )
 );
 
 -- Actualizar intervenciones
-CREATE POLICY "Actualizar intervenciones propias"
+CREATE POLICY "Insertar intervenciones propias"
 ON intervenciones
-FOR UPDATE
-USING (
+FOR INSERT
+WITH CHECK (
   EXISTS (
-    SELECT 1 FROM vehiculos
-    WHERE vehiculos.id = vehiculo_id
-    AND vehiculos.usuario_id = auth.uid()
+    SELECT 1 FROM vehiculos v
+    WHERE v.id = vehiculo_id
+    AND v.usuario_id = auth.uid()
   )
-);
+);;
 
 -- Eliminar intervenciones
 CREATE POLICY "Eliminar intervenciones propias"
@@ -93,11 +100,11 @@ ON intervenciones
 FOR DELETE
 USING (
   EXISTS (
-    SELECT 1 FROM vehiculos
-    WHERE vehiculos.id = vehiculo_id
-    AND vehiculos.usuario_id = auth.uid()
+    SELECT 1 FROM vehiculos v
+    WHERE v.id = vehiculo_id
+    AND v.usuario_id = auth.uid()
   )
-);
+);;
 
 -- Ver archivos usuario
 CREATE POLICY "Usuarios solo ven sus archivos"
