@@ -15,11 +15,8 @@ class VehicleRepository {
     final response = await _client
         .from('vehiculos')
         .select()
-        .eq('usuario_id', user.id);
-
-    // 🔥 DEBUG IMPORTANTE
-    print('USER ID: ${user.id}');
-    print('RESPONSE: $response');
+        .eq('usuario_id', user.id)
+        .order('fecha_creacion', ascending: true);
 
     return (response as List).map((e) => Vehicle.fromJson(e)).toList();
   }
@@ -36,5 +33,28 @@ class VehicleRepository {
     payload['usuario_id'] = user.id;
 
     await _client.from('vehiculos').insert(payload);
+  }
+
+  /// Actualizar vehículo
+  Future<void> updateVehicle(Vehicle vehicle) async {
+    // No enviamos id al JSON
+    final data = vehicle.toJson();
+
+    await _client.from('vehiculos').update(data).eq('id', vehicle.id);
+  }
+
+  /// Eliminar vehículo
+  Future<void> deleteVehicle(String vehicleId) async {
+    await _client.from('vehiculos').delete().eq('id', vehicleId);
+  }
+
+  Future<Vehicle> getVehicleById(String id) async {
+    final response = await _client
+        .from('vehiculos')
+        .select()
+        .eq('id', id)
+        .single();
+
+    return Vehicle.fromJson(response);
   }
 }

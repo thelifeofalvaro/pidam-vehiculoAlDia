@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_list_screen.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_manage_screen.dart';
+import 'package:vad_app/features/vehicles/screens/vehicle_detail_screen.dart';
 
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/vehicles': (context) => const VehicleListScreen(),
         '/vehicle-manage': (context) => const VehicleManageScreen(),
+        '/vehicle-detail': (context) => const VehicleDetailScreen(),
       },
     );
   }

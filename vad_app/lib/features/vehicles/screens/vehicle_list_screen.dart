@@ -77,6 +77,17 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                 return ListTile(
                   title: Text(v.matricula ?? 'Sin matrícula'),
                   subtitle: Text('${v.marca ?? ''} ${v.modelo ?? ''}'),
+                  onTap: () async {
+                    final result = await Navigator.pushNamed(
+                      context,
+                      '/vehicle-detail',
+                      arguments: v,
+                    );
+
+                    if (result == true) {
+                      loadVehicles();
+                    }
+                  },
                 );
               },
             ),

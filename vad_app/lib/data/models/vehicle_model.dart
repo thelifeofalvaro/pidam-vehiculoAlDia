@@ -49,4 +49,29 @@ class Vehicle {
       'km_vh': kmVh,
     };
   }
+
+  /// Actualizar datos en memoria
+  Vehicle copyWith({
+    String? id,
+    String? usuarioId,
+    String? tipo,
+    String? marca,
+    String? modelo,
+    String? matricula,
+    int? anioMatriculacion,
+    String? bastidor,
+    int? kmVh,
+  }) {
+    return Vehicle(
+      id: id ?? this.id,
+      usuarioId: usuarioId ?? this.usuarioId,
+      tipo: tipo ?? this.tipo,
+      marca: marca ?? this.marca,
+      modelo: modelo ?? this.modelo,
+      matricula: matricula ?? this.matricula,
+      anioMatriculacion: anioMatriculacion ?? this.anioMatriculacion,
+      bastidor: bastidor ?? this.bastidor,
+      kmVh: kmVh ?? this.kmVh,
+    );
+  }
 }

@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../data/repositories/vehicle_repository.dart';
-import '../../data/models/vehicle_model.dart';
-
-class VehicleItem {
-  const VehicleItem({
-    required this.brandModel,
-    required this.plate,
-    required this.km,
-  });
-
-  final String brandModel;
-  final String plate;
-  final String km;
-}
+import 'package:vad_app/data/models/vehicle_model.dart';
+import 'package:vad_app/data/repositories/vehicle_repository.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final VehicleRepository _repository = VehicleRepository();
 
-  List<VehicleItem> vehicles = [];
+  List<Vehicle> vehicles = [];
   bool isLoading = true;
 
   @override
@@ -37,35 +25,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> loadVehicles() async {
     try {
-      print('🔄 Cargando vehículos en HOME...');
-
       final data = await _repository.getVehicles();
 
-      print('✅ Datos crudos: $data');
-
-      final mapped = data.map((v) {
-        return VehicleItem(
-          brandModel: '${v.marca ?? ''} ${v.modelo ?? ''}',
-          plate: v.matricula ?? 'Sin matrícula',
-          km: v.kmVh != null ? '${v.kmVh} km' : 'Sin km',
-        );
-      }).toList();
-
       setState(() {
-        vehicles = mapped;
+        vehicles = data;
         isLoading = false;
       });
     } catch (e) {
-      print('❌ ERROR HOME: $e');
       setState(() => isLoading = false);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error cargando vehículos: $e')));
     }
   }
 
-  Future<void> _goToCreate() async {
+  Future<void> goToCreate() async {
     final result = await Navigator.pushNamed(context, '/vehicle-manage');
 
+    // Refresca tras crear
     if (result == true) {
-      loadVehicles(); // 🔥 recarga al volver
+      loadVehicles();
     }
   }
 
@@ -73,19 +53,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final bool hasVehicles = vehicles.isNotEmpty;
 
-    if (isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       backgroundColor: HomeScreen._screenBackground,
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: hasVehicles
-                  ? _HomeWithData(vehicles: vehicles, onAddVehicle: _goToCreate)
-                  : _HomeEmptyState(onAddVehicle: _goToCreate),
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : hasVehicles
+                  ? _HomeWithData(
+                      vehicles: vehicles,
+                      onAddVehicle: goToCreate,
+                      onRefresh: loadVehicles,
+                    )
+                  : _HomeEmptyState(onAddVehicle: goToCreate),
             ),
             const _BottomTabBar(),
           ],
@@ -193,7 +175,7 @@ class _HomeEmptyState extends StatelessWidget {
               ),
             ),
           ),
-          const Spacer(flex: 2),
+          const Spacer(),
         ],
       ),
     );
@@ -201,15 +183,21 @@ class _HomeEmptyState extends StatelessWidget {
 }
 
 class _HomeWithData extends StatelessWidget {
-  const _HomeWithData({required this.vehicles, required this.onAddVehicle});
+  const _HomeWithData({
+    required this.vehicles,
+    required this.onAddVehicle,
+    required this.onRefresh,
+  });
 
-  final List<VehicleItem> vehicles;
+  final List<Vehicle> vehicles;
   final VoidCallback onAddVehicle;
 
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _textSteel = Color(0xFF4A4A4A);
+  final Future<void> Function() onRefresh;
+
   static const Color _cloudWhite = Color(0xFFF4F7F6);
+  static const Color _primaryBlue = Color(0xFF0047AB);
+  static const Color _textSteel = Color(0xFF4A4A4A);
+  static const Color _actionOrange = Color(0xFFFF8C00);
   static const Color _carbonBlack = Color(0xFF1A1A1A);
 
   static const String _carCardImageUrl =
@@ -253,76 +241,89 @@ class _HomeWithData extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 92),
                   separatorBuilder: (_, __) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
-                    final item = vehicles[index];
-                    return Container(
-                      height: 110,
-                      padding: const EdgeInsets.fromLTRB(16, 15, 20, 13),
-                      decoration: BoxDecoration(
-                        color: _cloudWhite,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: 80,
-                            height: 80,
-                            child: Image.network(
-                              _carCardImageUrl,
-                              fit: BoxFit.contain,
+                    final v = vehicles[index];
+                    return GestureDetector(
+                      onTap: () async {
+                        final result = await Navigator.pushNamed(
+                          context,
+                          '/vehicle-detail',
+                          arguments: v,
+                        );
+
+                        if (result == true) {
+                          await onRefresh();
+                        }
+                      },
+                      child: Container(
+                        height: 110,
+                        padding: const EdgeInsets.fromLTRB(16, 15, 20, 13),
+                        decoration: BoxDecoration(
+                          color: _cloudWhite,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: Image.network(
+                                _carCardImageUrl,
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.brandModel,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    height: 24 / 18,
-                                    color: _carbonBlack,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${v.marca ?? ''} ${v.modelo ?? ''}'.trim(),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      height: 24 / 18,
+                                      color: _carbonBlack,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  item.plate,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'Roboto',
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                    height: 18 / 13,
-                                    color: _textSteel,
+                                  Text(
+                                    v.matricula ?? 'Matrícula',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Roboto',
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w400,
+                                      height: 18 / 13,
+                                      color: _textSteel,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  item.km,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    height: 22 / 16,
-                                    color: _textSteel,
+                                  Text(
+                                    '${v.kmVh ?? 0} Km',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      height: 22 / 16,
+                                      color: _textSteel,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Icon(
-                            Icons.chevron_right,
-                            color: _actionOrange,
-                            size: 24,
-                          ),
-                        ],
+                            const SizedBox(width: 12),
+                            const Icon(
+                              Icons.chevron_right,
+                              color: _actionOrange,
+                              size: 24,
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

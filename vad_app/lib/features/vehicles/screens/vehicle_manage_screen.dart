@@ -28,6 +28,8 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   final TextEditingController _matriculaController = TextEditingController();
   final TextEditingController _bastidorController = TextEditingController();
   final TextEditingController _kilometrajeController = TextEditingController();
+  final TextEditingController _anioMatriculacionController =
+      TextEditingController();
 
   final List<String> _tiposVehiculo = const [
     'Coche',
@@ -39,6 +41,31 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
 
   String? _tipoSeleccionado;
   bool _guardando = false;
+  bool _eliminando = false;
+
+  Vehicle? _vehicleEditando;
+  bool get _isEditing => _vehicleEditando != null;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    if (args != null && args is Vehicle && _vehicleEditando == null) {
+      _vehicleEditando = args;
+      _marcaModeloController.text = '${args.marca ?? ''} ${args.modelo ?? ''}';
+      _matriculaController.text = args.matricula ?? '';
+      _bastidorController.text = args.bastidor ?? '';
+      _kilometrajeController.text = args.kmVh != null
+          ? args.kmVh.toString()
+          : '';
+      _tipoSeleccionado = args.tipo;
+      _anioMatriculacionController.text = args.anioMatriculacion != null
+          ? args.anioMatriculacion.toString()
+          : '';
+    }
+  }
 
   @override
   void dispose() {
@@ -71,46 +98,123 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       final partes = textoMarcaModelo.split(RegExp(r'\s+'));
       final marca = partes.first;
       final modelo = partes.length > 1 ? partes.sublist(1).join(' ') : '';
-
       final km = int.tryParse(_kilometrajeController.text.trim());
-
-      final vehicle = Vehicle(
-        id: '',
-        usuarioId: user.id,
-        tipo: _tipoSeleccionado,
-        marca: marca,
-        modelo: modelo,
-        matricula: _matriculaController.text.trim().isEmpty
-            ? null
-            : _matriculaController.text.trim(),
-        anioMatriculacion: null,
-        bastidor: _bastidorController.text.trim().isEmpty
-            ? null
-            : _bastidorController.text.trim(),
-        kmVh: km,
+      final a_matricula = int.tryParse(
+        _anioMatriculacionController.text.trim(),
       );
 
-      await _vehicleRepository.createVehicle(vehicle);
+      if (_isEditing) {
+        final updatedVehicle = Vehicle(
+          id: _vehicleEditando!.id,
+          usuarioId: user.id,
+          tipo: _tipoSeleccionado,
+          marca: marca,
+          modelo: modelo,
+          matricula: _matriculaController.text.trim().isEmpty
+              ? null
+              : _matriculaController.text.trim(),
+          anioMatriculacion: a_matricula,
+          bastidor: _bastidorController.text.trim().isEmpty
+              ? null
+              : _bastidorController.text.trim(),
+          kmVh: km,
+        );
+
+        await _vehicleRepository.updateVehicle(updatedVehicle);
+      } else {
+        final vehicle = Vehicle(
+          id: '',
+          usuarioId: user.id,
+          tipo: _tipoSeleccionado,
+          marca: marca,
+          modelo: modelo,
+          matricula: _matriculaController.text.trim().isEmpty
+              ? null
+              : _matriculaController.text.trim(),
+          anioMatriculacion: _anioMatriculacionController.text.trim().isEmpty
+              ? null
+              : a_matricula,
+          bastidor: _bastidorController.text.trim().isEmpty
+              ? null
+              : _bastidorController.text.trim(),
+          kmVh: km,
+        );
+
+        await _vehicleRepository.createVehicle(vehicle);
+      }
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vehículo guardado correctamente')),
+        SnackBar(
+          content: Text(
+            _isEditing
+                ? 'Vehículo actualizado correctamente'
+                : 'Vehículo guardado correctamente',
+          ),
+        ),
       );
 
-      Navigator.pop(context, true); // 👈 vuelve y refresca lista
+      Navigator.pop(context, true);
     } catch (e) {
-      print('ERROR AL GUARDAR VEHICULO: $e');
-
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      if (mounted) {
-        setState(() => _guardando = false);
-      }
+      if (mounted) setState(() => _guardando = false);
+    }
+  }
+
+  Future<void> _eliminarVehiculo() async {
+    if (!_isEditing) {
+      _limpiarFormulario();
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Formulario limpiado')));
+      return;
+    }
+
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Eliminar vehículo'),
+          content: const Text('¿Seguro que quieres eliminar este vehículo?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Eliminar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmado != true) return;
+
+    setState(() => _eliminando = true);
+
+    try {
+      await _vehicleRepository.deleteVehicle(_vehicleEditando!.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Vehículo eliminado')));
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al eliminar: $e')));
+    } finally {
+      if (mounted) setState(() => _eliminando = false);
     }
   }
 
@@ -119,10 +223,14 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
     _matriculaController.clear();
     _bastidorController.clear();
     _kilometrajeController.clear();
+    _anioMatriculacionController.clear();
     setState(() => _tipoSeleccionado = null);
   }
 
-  InputDecoration _inputDecoration({String? hintText, bool withBorder = false}) {
+  InputDecoration _inputDecoration({
+    String? hintText,
+    bool withBorder = false,
+  }) {
     return InputDecoration(
       hintText: hintText,
       hintStyle: const TextStyle(
@@ -135,12 +243,6 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       filled: true,
       fillColor: _cloudWhite,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(
-          color: withBorder ? const Color(0xFFE0E0E0) : Colors.transparent,
-        ),
-      ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(
@@ -150,6 +252,12 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: const BorderSide(color: _primaryBlue, width: 1),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide(
+          color: withBorder ? const Color(0xFFE0E0E0) : Colors.transparent,
+        ),
       ),
     );
   }
@@ -183,11 +291,13 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                               padding: EdgeInsets.zero,
                             ),
                           ),
-                          const Expanded(
+                          Expanded(
                             child: Center(
                               child: Text(
-                                'Gestionar Vehículo',
-                                style: TextStyle(
+                                _isEditing
+                                    ? 'Editar Vehículo'
+                                    : 'Añadir Vehículo',
+                                style: const TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
@@ -259,7 +369,9 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           height: 18 / 13,
                           color: _carbonBlack,
                         ),
-                        decoration: _inputDecoration(hintText: 'Tipo de vehículo'),
+                        decoration: _inputDecoration(
+                          hintText: 'Tipo de vehículo',
+                        ),
                         dropdownColor: _cloudWhite,
                         items: _tiposVehiculo
                             .map(
@@ -269,9 +381,11 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                               ),
                             )
                             .toList(),
-                        onChanged: (value) {
-                          setState(() => _tipoSeleccionado = value);
-                        },
+                        onChanged: (_guardando || _eliminando)
+                            ? null
+                            : (value) {
+                                setState(() => _tipoSeleccionado = value);
+                              },
                       ),
                     ),
                     const SizedBox(height: 21),
@@ -325,10 +439,24 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                     ),
                     const SizedBox(height: 21),
                     SizedBox(
+                      height: 48,
+                      child: TextField(
+                        controller: _anioMatriculacionController,
+                        keyboardType: TextInputType.number,
+                        decoration: _inputDecoration(
+                          hintText: 'Año de matriculación',
+                          withBorder: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 21),
+                    SizedBox(
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _guardando ? null : _guardarVehiculo,
+                        onPressed: (_guardando || _eliminando)
+                            ? null
+                            : _guardarVehiculo,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _actionOrange,
                           foregroundColor: _carbonBlack,
@@ -349,9 +477,11 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                                   color: _carbonBlack,
                                 ),
                               )
-                            : const Text(
-                                'Guardar Vehículo',
-                                style: TextStyle(
+                            : Text(
+                                _isEditing
+                                    ? 'Guardar cambios'
+                                    : 'Guardar Vehículo',
+                                style: const TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -365,7 +495,9 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _guardando ? null : _limpiarFormulario,
+                        onPressed: (_guardando || _eliminando)
+                            ? null
+                            : _eliminarVehiculo,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _errorRed,
                           foregroundColor: Colors.white,
@@ -377,15 +509,24 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          'Eliminar Vehículo',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            height: 20 / 16,
-                          ),
-                        ),
+                        child: _eliminando
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Eliminar Vehículo',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  height: 20 / 16,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -405,23 +546,32 @@ class _BottomTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget tabItem({required IconData icon, required String label}) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: secondarySteel, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              height: 18 / 13,
-              color: secondarySteel,
+    Widget tabItem({
+      required IconData icon,
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      return GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 2),
+            Icon(icon, color: secondarySteel, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                height: 18 / 13,
+                color: secondarySteel,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -435,9 +585,33 @@ class _BottomTabBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          tabItem(icon: Icons.home_outlined, label: 'Inicio'),
-          tabItem(icon: Icons.build_outlined, label: 'Historial'),
-          tabItem(icon: Icons.account_circle_outlined, label: 'Perfil'),
+          tabItem(
+            icon: Icons.home_outlined,
+            label: 'Inicio',
+            onTap: () {
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil('/home', (route) => false);
+            },
+          ),
+          tabItem(
+            icon: Icons.build_outlined,
+            label: 'Historial',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Historial: próximamente')),
+              );
+            },
+          ),
+          tabItem(
+            icon: Icons.account_circle_outlined,
+            label: 'Perfil',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Perfil: próximamente')),
+              );
+            },
+          ),
         ],
       ),
     );
