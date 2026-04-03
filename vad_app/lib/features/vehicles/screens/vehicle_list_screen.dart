@@ -47,7 +47,11 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   Future<void> goToCreate() async {
     final result = await Navigator.pushNamed(context, '/vehicle-manage');
 
-    // 🔥 SOLO recarga si realmente se ha creado algo
+    if (result == true) {
+      loadVehicles();
+    }
+
+    // Recarga al crear algo
     if (result == true) {
       print('🔁 Recargando lista tras crear vehículo...');
       loadVehicles();

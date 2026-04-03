@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart';
 import '../../../data/repositories/intervention_repository.dart';
 
-// Color tokens from Figma design
 const Color primaryBlue = Color(0xFF0047AB);
 const Color actionOrange = Color(0xFFFF8C00);
 const Color titleBlack = Color(0xFF1A1A1A);
@@ -12,6 +13,7 @@ const Color textGray = Color(0xFF4A4A4A);
 const Color secondaryGray = Color(0xFF708090);
 const Color cardWhite = Color(0xFFFFFFFF);
 const Color bgLightBlue = Color(0xFFF4F7F6);
+const Color errorRed = Color(0xFFFF4C4C);
 
 class InterventionListScreen extends StatefulWidget {
   final Vehicle vehicle;
@@ -27,11 +29,31 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
   List<Intervention> interventions = [];
   bool isLoading = true;
   String selectedFilterType = 'Todo';
+  bool hasChanges = false;
 
   @override
   void initState() {
     super.initState();
     loadInterventions();
+  }
+
+  List<Intervention> get filteredInterventions {
+    if (selectedFilterType == 'Todo') return interventions;
+
+    return interventions.where((i) {
+      final tipo = i.tipoIntervencion?.toLowerCase() ?? '';
+
+      switch (selectedFilterType) {
+        case 'Revisión':
+          return tipo.contains('revisión');
+        case 'Reparación':
+          return tipo.contains('reparación');
+        case 'Mejoras':
+          return tipo.contains('mejora') || tipo.contains('modificación');
+        default:
+          return true;
+      }
+    }).toList();
   }
 
   Future<void> loadInterventions() async {
@@ -65,6 +87,83 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
     if (result == true) {
       print('Recargando lista tras crear intervención...');
       loadInterventions();
+      hasChanges = true;
+    }
+  }
+
+  Future<void> _pickAndUploadFile(Intervention intervention) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        withData: true,
+      );
+
+      if (result == null) return;
+
+      final file = result.files.first;
+
+      /// Validación tamaño (2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('El archivo supera los 2MB')),
+        );
+        return;
+      }
+
+      await _uploadToSupabase(intervention, file);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error seleccionando archivo: $e')),
+      );
+    }
+  }
+
+  Future<void> _uploadToSupabase(
+    Intervention intervention,
+    PlatformFile file,
+  ) async {
+    try {
+      final fileBytes = file.bytes!;
+      if (fileBytes == null) {
+        throw Exception('No se pudo leer el archivo');
+      }
+      final fileName =
+          '${intervention.id}_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+
+      final path = 'interventions/$fileName';
+
+      final supabase = Supabase.instance.client;
+
+      await supabase.storage
+          .from('interventions')
+          .uploadBinary(
+            path,
+            fileBytes,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      final publicUrl = supabase.storage
+          .from('interventions')
+          .getPublicUrl(path);
+
+      /// Guardar URL en la intervención
+      await _repository.updateIntervention(
+        intervention.copyWith(urlAdjunto: publicUrl),
+      );
+
+      loadInterventions();
+      hasChanges = true;
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Archivo subido correctamente')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error subiendo archivo: $e')));
     }
   }
 
@@ -101,41 +200,47 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: cardWhite,
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, hasChanges);
+        return false;
+      },
+      child: Scaffold(
         backgroundColor: cardWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryBlue),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Historial Vehículo',
-          style: TextStyle(
-            color: primaryBlue,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
+        appBar: AppBar(
+          backgroundColor: cardWhite,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: primaryBlue),
+            onPressed: () => Navigator.pop(context, hasChanges),
+          ),
+          title: const Text(
+            'Historial Vehículo',
+            style: TextStyle(
+              color: primaryBlue,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            ),
           ),
         ),
+        floatingActionButton: interventions.isNotEmpty
+            ? FloatingActionButton(
+                onPressed: goToCreate,
+                backgroundColor: actionOrange,
+                child: const Icon(Icons.add, color: titleBlack),
+              )
+            : null,
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator(color: primaryBlue))
+            : interventions.isEmpty
+            ? _buildEmptyState()
+            : _buildDataState(),
       ),
-      floatingActionButton: interventions.isNotEmpty
-          ? FloatingActionButton(
-              onPressed: goToCreate,
-              backgroundColor: actionOrange,
-              child: const Icon(Icons.add, color: titleBlack),
-            )
-          : null,
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator(color: primaryBlue))
-          : interventions.isEmpty
-          ? _buildEmptyState()
-          : _buildDataState(),
     );
   }
 
-  // Empty state design
+  // Pantalla Vacia
   Widget _buildEmptyState() {
     return SingleChildScrollView(
       child: Padding(
@@ -216,11 +321,11 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
     );
   }
 
-  // Data state design with timeline
+  // Pantalla con Datos
   Widget _buildDataState() {
     return Column(
       children: [
-        // Filter buttons and vehicle info
+        // Botones de filtro y tarjeta de info del vehículo
         Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -331,9 +436,9 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            itemCount: interventions.length,
+            itemCount: filteredInterventions.length,
             itemBuilder: (context, index) {
-              return _buildTimelineItem(interventions[index], index);
+              return _buildTimelineItem(filteredInterventions[index], index);
             },
           ),
         ),
@@ -374,19 +479,10 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
           ],
         ),
         const SizedBox(width: 16),
-        // Card with intervention details (tappable for editing)
+        // Ficha de Intervencion. Se pulsa para editar
         Expanded(
           child: GestureDetector(
-            onTap: () async {
-              final result = await Navigator.pushNamed(
-                context,
-                '/intervention-manage',
-                arguments: intervention,
-              );
-              if (result == true) {
-                loadInterventions();
-              }
-            },
+            onTap: () => _showInterventionOptions(intervention),
             child: Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
@@ -397,15 +493,49 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    intervention.tipoIntervencion ?? 'Sin tipo',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: titleBlack,
-                      fontFamily: 'Inter',
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          intervention.tipoIntervencion ?? 'Sin tipo',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: titleBlack,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+
+                      if (intervention.urlAdjunto != null &&
+                          intervention.urlAdjunto!.isNotEmpty)
+                        const Padding(
+                          padding: EdgeInsets.only(left: 6),
+                          child: Icon(
+                            Icons.attach_file,
+                            size: 18,
+                            color: secondaryGray,
+                          ),
+                        ),
+                    ],
                   ),
+
+                  if (intervention.descripcion != null &&
+                      intervention.descripcion!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        intervention.descripcion!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: textGray,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -440,23 +570,30 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
   }
 
   Widget _buildFilterButton(String label, bool isSelected) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? primaryBlue : cardWhite,
-        border: Border.all(
-          color: isSelected ? primaryBlue : primaryBlue,
-          width: 1.5,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedFilterType = label;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? primaryBlue : cardWhite,
+          border: Border.all(
+            color: isSelected ? primaryBlue : primaryBlue,
+            width: 1.5,
+          ),
+          borderRadius: BorderRadius.circular(20),
         ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
-          color: isSelected ? cardWhite : primaryBlue,
-          fontFamily: 'Roboto',
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+            color: isSelected ? cardWhite : primaryBlue,
+            fontFamily: 'Roboto',
+          ),
         ),
       ),
     );
@@ -464,12 +601,103 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
   IconData _getInterventionIcon(String? type) {
     return switch (type?.toLowerCase()) {
-      'cambio de aceite' => Icons.oil_barrel_outlined,
-      'cambio de neumáticos' => Icons.tire_repair_outlined,
-      'revisión' => Icons.assignment_outlined,
+      'revisión' => Icons.check_box_outlined,
       'reparación' => Icons.handyman_outlined,
       'mejora' => Icons.star_outline,
+      'modificación' => Icons.star_outline,
+      'otros' => Icons.tag_outlined,
       _ => Icons.build_outlined,
     };
+  }
+
+  void _showInterventionOptions(Intervention intervention) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+
+              /// Editar Intervención
+              ListTile(
+                leading: const Icon(Icons.edit, color: primaryBlue),
+                title: const Text('Editar intervención'),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  final result = await Navigator.pushNamed(
+                    context,
+                    '/intervention-manage',
+                    arguments: intervention,
+                  );
+
+                  if (result == true) {
+                    loadInterventions();
+                    hasChanges = true;
+                  }
+                },
+              ),
+
+              if (intervention.urlAdjunto != null &&
+                  intervention.urlAdjunto!.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.delete, color: errorRed),
+                  title: const Text('Eliminar archivo'),
+                  onTap: () async {
+                    Navigator.pop(context);
+
+                    try {
+                      final supabase = Supabase.instance.client;
+
+                      final uri = Uri.parse(intervention.urlAdjunto!);
+                      final filePath = uri.pathSegments.skip(2).join('/');
+
+                      await supabase.storage.from('interventions').remove([
+                        filePath,
+                      ]);
+
+                      await _repository.updateIntervention(
+                        intervention.copyWith(urlAdjunto: null),
+                      );
+
+                      loadInterventions();
+                      hasChanges = true;
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Archivo eliminado')),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error eliminando archivo: $e')),
+                      );
+                    }
+                  },
+                ),
+
+              /// Adjuntar Archivo (solo si no tiene ya), máx 1 Archivo 2MB
+              if (intervention.urlAdjunto == null ||
+                  intervention.urlAdjunto!.isEmpty)
+                ListTile(
+                  leading: const Icon(Icons.attach_file, color: actionOrange),
+                  title: const Text('Añadir archivo'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickAndUploadFile(intervention);
+                  },
+                ),
+
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

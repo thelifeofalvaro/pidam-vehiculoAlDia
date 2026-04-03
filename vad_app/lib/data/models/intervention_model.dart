@@ -53,4 +53,30 @@ class Intervention {
       'lugar': lugar,
     };
   }
+
+  Intervention copyWith({
+    String? id,
+    String? vehiculoId,
+    String? tipoIntervencion,
+    String? descripcion,
+    double? coste,
+    String? notas,
+    int? kmIntervencion,
+    String? urlAdjunto,
+    DateTime? fechaIntervencion,
+    String? lugar,
+  }) {
+    return Intervention(
+      id: id ?? this.id,
+      vehiculoId: vehiculoId ?? this.vehiculoId,
+      tipoIntervencion: tipoIntervencion ?? this.tipoIntervencion,
+      descripcion: descripcion ?? this.descripcion,
+      coste: coste ?? this.coste,
+      notas: notas ?? this.notas,
+      kmIntervencion: kmIntervencion ?? this.kmIntervencion,
+      urlAdjunto: urlAdjunto ?? this.urlAdjunto,
+      fechaIntervencion: fechaIntervencion ?? this.fechaIntervencion,
+      lugar: lugar ?? this.lugar,
+    );
+  }
 }

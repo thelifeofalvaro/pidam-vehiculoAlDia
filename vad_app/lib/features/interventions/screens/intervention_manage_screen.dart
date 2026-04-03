@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
@@ -30,6 +32,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
   final kmController = TextEditingController();
   final costeController = TextEditingController();
   final notasController = TextEditingController();
+  final descripcionController = TextEditingController();
 
   // State variables
   String? lugarSeleccionado;
@@ -59,7 +62,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     super.didChangeDependencies();
     argumentos = ModalRoute.of(context)!.settings.arguments;
 
-    // Determinar si es edición o creación
+    // Ver si se edita o se crea la intervención
     if (argumentos is model.Intervention) {
       // Edición, se recibe pantalla con datos
       interventionToEdit = argumentos as model.Intervention;
@@ -80,6 +83,8 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     tipoSeleccionado = intervention.tipoIntervencion;
     fechaSeleccionada = intervention.fechaIntervencion;
     notasController.text = intervention.notas ?? '';
+    descripcionController.text = intervention.descripcion ?? '';
+    documentoAdjunto = intervention.urlAdjunto;
   }
 
   Future<void> selectDate(BuildContext context) async {
@@ -108,7 +113,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       id: interventionToEdit?.id ?? '',
       vehiculoId: vehicle.id,
       tipoIntervencion: tipoSeleccionado!.toLowerCase(),
-      descripcion: null,
+      descripcion: descripcionController.text,
       coste: double.tryParse(costeController.text),
       notas: notasController.text,
       kmIntervencion: int.tryParse(kmController.text),
@@ -173,11 +178,93 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     }
   }
 
+  Future<void> _pickAndUploadFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        withData: true,
+      );
+
+      if (result == null) return;
+
+      final file = result.files.first;
+
+      if (file.size > 2 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('El archivo supera los 2MB')),
+        );
+        return;
+      }
+
+      final fileBytes = file.bytes;
+      if (fileBytes == null) throw Exception('Archivo inválido');
+
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+
+      final path = 'interventions/$fileName';
+
+      final supabase = Supabase.instance.client;
+
+      await supabase.storage
+          .from('interventions')
+          .uploadBinary(
+            path,
+            fileBytes,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      final publicUrl = supabase.storage
+          .from('interventions')
+          .getPublicUrl(path);
+
+      setState(() {
+        documentoAdjunto = publicUrl;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Archivo subido correctamente')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error subiendo archivo: $e')));
+    }
+  }
+
+  Future<void> _deleteFile() async {
+    try {
+      if (documentoAdjunto == null) return;
+
+      final supabase = Supabase.instance.client;
+
+      /// Extraer path desde URL
+      final uri = Uri.parse(documentoAdjunto!);
+      final filePath = uri.pathSegments.skip(2).join('/');
+
+      await supabase.storage.from('interventions').remove([filePath]);
+
+      setState(() {
+        documentoAdjunto = null;
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Archivo eliminado')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error eliminando archivo: $e')));
+    }
+  }
+
   @override
   void dispose() {
     kmController.dispose();
     costeController.dispose();
     notasController.dispose();
+    descripcionController.dispose();
     super.dispose();
   }
 
@@ -207,7 +294,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Column(
             children: [
-              // Casa o Taller dropdown
+              // Selector Lugar Intervención
               _buildDropdownField(
                 label: 'Casa o Taller',
                 value: lugarSeleccionado,
@@ -230,6 +317,13 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                 value: tipoSeleccionado,
                 items: tipos,
                 onChanged: (v) => setState(() => tipoSeleccionado = v),
+              ),
+              const SizedBox(height: 21),
+
+              // Descripción
+              _buildTextField(
+                controller: descripcionController,
+                label: 'Descripción',
               ),
               const SizedBox(height: 21),
 
@@ -405,32 +499,42 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
   }
 
   Widget _buildFileUploadField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: bgLightBlue,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
+    final hasFile = documentoAdjunto != null && documentoAdjunto!.isNotEmpty;
+
+    return GestureDetector(
+      onTap: () {
+        if (hasFile) {
+          _deleteFile();
+        } else {
+          _pickAndUploadFile();
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
           color: bgLightBlue,
-          width: 1.5,
-          style: BorderStyle.solid,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: bgLightBlue, width: 1.5),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.attach_file, color: titleBlack, size: 24),
-          const SizedBox(width: 8),
-          const Text(
-            'Adjuntar Documento',
-            style: TextStyle(
-              color: titleBlack,
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Roboto',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              hasFile ? Icons.delete_outline : Icons.attach_file,
+              color: hasFile ? errorRed : titleBlack,
             ),
-          ),
-        ],
+            const SizedBox(width: 8),
+            Text(
+              hasFile ? 'Eliminar documento' : 'Adjuntar documento',
+              style: TextStyle(
+                color: hasFile ? errorRed : titleBlack,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'Roboto',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

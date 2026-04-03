@@ -37,8 +37,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final Vehicle vehicle =
-        ModalRoute.of(context)!.settings.arguments as Vehicle;
+    final vehicle = _vehicle!;
     final String marcaModelo = '${vehicle.marca ?? ''} ${vehicle.modelo ?? ''}'
         .trim();
 
@@ -64,7 +63,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               size: 28,
                               color: _carbonBlack,
                             ),
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Navigator.pop(context, true),
                           ),
                           IconButton(
                             icon: const Icon(
@@ -245,12 +244,17 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             final result = await Navigator.pushNamed(
                               context,
                               '/intervention-list',
-                              arguments: vehicle, // 👈 IMPORTANTE
+                              arguments: vehicle,
                             );
 
+                            /// Función de refresco, tambien cambia al añadir una nueva intervención
                             if (result == true) {
-                              // por si quieres refrescar detalle en el futuro
-                              setState(() {});
+                              final updated = await VehicleRepository()
+                                  .getVehicleById(vehicle.id);
+
+                              setState(() {
+                                _vehicle = updated;
+                              });
                             }
                           },
                           child: const Text(
