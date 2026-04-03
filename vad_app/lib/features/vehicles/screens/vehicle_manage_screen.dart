@@ -99,7 +99,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       final marca = partes.first;
       final modelo = partes.length > 1 ? partes.sublist(1).join(' ') : '';
       final km = int.tryParse(_kilometrajeController.text.trim());
-      final a_matricula = int.tryParse(
+      final aMatricula = int.tryParse(
         _anioMatriculacionController.text.trim(),
       );
 
@@ -113,7 +113,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
           matricula: _matriculaController.text.trim().isEmpty
               ? null
               : _matriculaController.text.trim(),
-          anioMatriculacion: a_matricula,
+          anioMatriculacion: aMatricula,
           bastidor: _bastidorController.text.trim().isEmpty
               ? null
               : _bastidorController.text.trim(),
@@ -133,7 +133,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
               : _matriculaController.text.trim(),
           anioMatriculacion: _anioMatriculacionController.text.trim().isEmpty
               ? null
-              : a_matricula,
+              : aMatricula,
           bastidor: _bastidorController.text.trim().isEmpty
               ? null
               : _bastidorController.text.trim(),
@@ -357,7 +357,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                     SizedBox(
                       height: 48,
                       child: DropdownButtonFormField<String>(
-                        value: _tipoSeleccionado,
+                        initialValue: _tipoSeleccionado,
                         icon: const Icon(
                           Icons.keyboard_arrow_down,
                           color: _actionOrange,

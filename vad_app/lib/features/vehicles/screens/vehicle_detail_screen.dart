@@ -37,7 +37,8 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final vehicle = _vehicle!;
+    final Vehicle vehicle =
+        ModalRoute.of(context)!.settings.arguments as Vehicle;
     final String marcaModelo = '${vehicle.marca ?? ''} ${vehicle.modelo ?? ''}'
         .trim();
 
@@ -240,12 +241,17 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Historial próximamente'),
-                              ),
+                          onPressed: () async {
+                            final result = await Navigator.pushNamed(
+                              context,
+                              '/intervention-list',
+                              arguments: vehicle, // 👈 IMPORTANTE
                             );
+
+                            if (result == true) {
+                              // por si quieres refrescar detalle en el futuro
+                              setState(() {});
+                            }
                           },
                           child: const Text(
                             'Historial',

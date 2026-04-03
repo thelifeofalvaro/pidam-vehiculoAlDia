@@ -1,4 +1,5 @@
 /// Pantalla para comprobar el estado de la aplicación y redirigir al usuario a la pantalla de inicio o a la pantalla de inicio de sesión según corresponda.
+library;
 
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

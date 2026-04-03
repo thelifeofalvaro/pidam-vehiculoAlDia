@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_list_screen.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_manage_screen.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_detail_screen.dart';
+import 'package:vad_app/data/models/vehicle_model.dart';
+import 'package:vad_app/features/interventions/screens/intervention_list_screen.dart';
+import 'package:vad_app/features/interventions/screens/intervention_manage_screen.dart';
 
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
@@ -39,7 +43,22 @@ class MyApp extends StatelessWidget {
         '/vehicles': (context) => const VehicleListScreen(),
         '/vehicle-manage': (context) => const VehicleManageScreen(),
         '/vehicle-detail': (context) => const VehicleDetailScreen(),
+        '/intervention-list': (context) {
+          final vehicle = ModalRoute.of(context)!.settings.arguments as Vehicle;
+          return InterventionListScreen(vehicle: vehicle);
+        },
+        '/intervention-manage': (context) => const InterventionManageScreen(),
       },
+
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      supportedLocales: const [
+        Locale('es'), // español
+      ],
     );
   }
 }
