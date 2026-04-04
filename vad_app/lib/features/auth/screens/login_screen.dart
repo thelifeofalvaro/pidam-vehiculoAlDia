@@ -2,6 +2,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:vad_app/core/app_color.dart';
+
 import '../../../data/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -12,16 +14,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  static const String _logoUrl =
-      'https://www.figma.com/api/mcp/asset/397b1977-67b7-4cd4-9f19-90347348dcde';
-
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _textSteel = Color(0xFF4A4A4A);
-  static const Color _cloudWhite = Color(0xFFF4F7F6);
-  static const Color _carbonBlack = Color(0xFF1A1A1A);
-  static const Color _screenBackground = Color(0xFFEAEAEA);
-
   // Controladores para los inputs
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -40,16 +32,21 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passwordController.text.trim(),
       );
 
+      if (!mounted) return;
+
       // Si todo va bien → ir a Home
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      // Mostrar error
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+    } finally {
+      if (mounted)
+        setState(() {
+          isLoading = false;
+        });
     }
-
-    setState(() => isLoading = false);
   }
 
   @override
@@ -62,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _screenBackground,
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -75,7 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 110,
                     width: 110,
-                    child: Image.network(_logoUrl, fit: BoxFit.cover),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       height: 28 / 22,
-                      color: _primaryBlue,
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -100,10 +100,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: _textSteel,
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
-                      fillColor: _cloudWhite,
+                      fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
-                          color: _primaryBlue,
+                          color: AppColors.primaryBlue,
                           width: 1.2,
                         ),
                       ),
@@ -136,10 +136,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: _textSteel,
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
-                      fillColor: _cloudWhite,
+                      fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
-                          color: _primaryBlue,
+                          color: AppColors.primaryBlue,
                           width: 1.2,
                         ),
                       ),
@@ -168,11 +168,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: isLoading ? null : login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _actionOrange,
-                        foregroundColor: _carbonBlack,
-                        disabledBackgroundColor: _actionOrange.withValues(
-                          alpha: 0.6,
-                        ),
+                        backgroundColor: AppColors.actionOrange,
+                        foregroundColor: AppColors.carbonBlack,
+                        disabledBackgroundColor: AppColors.actionOrange
+                            .withValues(alpha: 0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -185,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  _carbonBlack,
+                                  AppColors.carbonBlack,
                                 ),
                               ),
                             )
@@ -211,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                           height: 22 / 15,
-                          color: _textSteel,
+                          color: AppColors.textSteel,
                         ),
                       ),
                       TextButton(
@@ -219,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushNamed(context, '/register');
                         },
                         style: TextButton.styleFrom(
-                          foregroundColor: _primaryBlue,
+                          foregroundColor: AppColors.primaryBlue,
                           padding: const EdgeInsets.only(left: 10),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,

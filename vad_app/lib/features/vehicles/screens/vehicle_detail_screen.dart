@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
+
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
-
-const Color secondarySteel = Color(0xFF708090);
 
 class VehicleDetailScreen extends StatefulWidget {
   const VehicleDetailScreen({super.key});
@@ -12,13 +13,6 @@ class VehicleDetailScreen extends StatefulWidget {
 }
 
 class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
-  static const Color _screenBackground = Color(0xFFEAEAEA);
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _cloudWhite = Color(0xFFF4F7F6);
-  static const Color _carbonBlack = Color(0xFF1A1A1A);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _errorRed = Color(0xFFD32F2F);
-
   Vehicle? _vehicle;
 
   @override
@@ -42,7 +36,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
         .trim();
 
     return Scaffold(
-      backgroundColor: _screenBackground,
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -61,7 +55,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             icon: const Icon(
                               Icons.chevron_left,
                               size: 28,
-                              color: _carbonBlack,
+                              color: AppColors.carbonBlack,
                             ),
                             onPressed: () => Navigator.pop(context, true),
                           ),
@@ -69,7 +63,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             icon: const Icon(
                               Icons.edit_square,
                               size: 24,
-                              color: _carbonBlack,
+                              color: AppColors.carbonBlack,
                             ),
                             onPressed: () async {
                               final result = await Navigator.pushNamed(
@@ -99,7 +93,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                       height: 200,
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: _cloudWhite,
+                        color: AppColors.cloudWhite,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ClipRRect(
@@ -108,12 +102,12 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                           'https://via.placeholder.com/400x200?text=Vehículo',
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            color: _cloudWhite,
+                            color: AppColors.cloudWhite,
                             child: const Center(
                               child: Icon(
                                 Icons.directions_car,
                                 size: 80,
-                                color: secondarySteel,
+                                color: AppColors.secondarySteel,
                               ),
                             ),
                           ),
@@ -130,7 +124,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: _cloudWhite,
+                          color: AppColors.cloudWhite,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Column(
@@ -143,7 +137,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Inter',
-                                color: _carbonBlack,
+                                color: AppColors.carbonBlack,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -155,7 +149,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: _primaryBlue.withOpacity(0.1),
+                                color: AppColors.primaryBlue.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -164,7 +158,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'Roboto',
-                                  color: _primaryBlue,
+                                  color: AppColors.primaryBlue,
                                 ),
                               ),
                             ),
@@ -176,7 +170,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontFamily: 'Roboto',
-                                color: secondarySteel,
+                                color: AppColors.secondarySteel,
                               ),
                             ),
                           ],
@@ -235,7 +229,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                         height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _actionOrange,
+                            backgroundColor: AppColors.actionOrange,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -277,15 +271,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
             ),
 
             /// 🔹 BOTTOM TAB BAR
-            _BottomTabBar(
-              onInicioTap: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/home',
-                  (route) => false,
-                );
-              },
-            ),
+            AppBottomNavBar(currentIndex: 0),
           ],
         ),
       ),
@@ -300,13 +286,13 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _cloudWhite,
+        color: AppColors.cloudWhite,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(icon, size: 24, color: _actionOrange),
+          Icon(icon, size: 24, color: AppColors.actionOrange),
           const SizedBox(height: 8),
           Text(
             value,
@@ -314,7 +300,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               fontSize: 14,
               fontWeight: FontWeight.bold,
               fontFamily: 'Inter',
-              color: _carbonBlack,
+              color: AppColors.carbonBlack,
             ),
             textAlign: TextAlign.center,
           ),
@@ -324,118 +310,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
             style: const TextStyle(
               fontSize: 11,
               fontFamily: 'Roboto',
-              color: secondarySteel,
+              color: AppColors.secondarySteel,
             ),
             textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// 🔹 BOTTOM TAB BAR COMPONENT
-class _BottomTabBar extends StatelessWidget {
-  final VoidCallback? onInicioTap;
-
-  const _BottomTabBar({this.onInicioTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 84,
-      color: Colors.white,
-      child: Column(
-        children: [
-          Container(height: 1, color: const Color(0xFFEAEAEA)),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: onInicioTap,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.home_outlined,
-                          size: 24,
-                          color: Color(0xFF708090),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Inicio',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF708090),
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Historial próximamente')),
-                      );
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.history,
-                          size: 24,
-                          color: Color(0xFF708090),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Historial',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF708090),
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Perfil próximamente')),
-                      );
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.person_outline,
-                          size: 24,
-                          color: Color(0xFF708090),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Perfil',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF708090),
-                            fontFamily: 'Roboto',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

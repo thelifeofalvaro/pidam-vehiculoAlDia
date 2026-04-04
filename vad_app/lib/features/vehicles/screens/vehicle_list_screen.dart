@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+//TODO: VER PALETA COLORES
+
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
 
@@ -23,19 +26,13 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
   Future<void> loadVehicles() async {
     try {
-      print('🔄 Cargando vehículos...');
-
       final data = await _repository.getVehicles();
-
-      print('✅ Vehículos obtenidos: $data');
 
       setState(() {
         vehicles = data;
         isLoading = false;
       });
     } catch (e) {
-      print('❌ ERROR CARGANDO VEHICULOS: $e');
-
       setState(() => isLoading = false);
 
       ScaffoldMessenger.of(
@@ -53,10 +50,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
 
     // Recarga al crear algo
     if (result == true) {
-      print('🔁 Recargando lista tras crear vehículo...');
       loadVehicles();
     }
-    print('🚗 ESTOY EN VEHICLE LIST SCREEN');
   }
 
   @override

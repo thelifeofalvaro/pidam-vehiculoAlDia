@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
-
-const Color secondarySteel = Color(0xFF708090);
 
 class VehicleManageScreen extends StatefulWidget {
   const VehicleManageScreen({super.key});
@@ -14,14 +14,6 @@ class VehicleManageScreen extends StatefulWidget {
 }
 
 class _VehicleManageScreenState extends State<VehicleManageScreen> {
-  static const Color _screenBackground = Color(0xFFEAEAEA);
-  static const Color _cloudWhite = Color(0xFFF4F7F6);
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _errorRed = Color(0xFFD32F2F);
-  static const Color _secondarySteel = Color(0xFF708090);
-  static const Color _carbonBlack = Color(0xFF1A1A1A);
-
   final VehicleRepository _vehicleRepository = VehicleRepository();
 
   final TextEditingController _marcaModeloController = TextEditingController();
@@ -99,9 +91,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       final marca = partes.first;
       final modelo = partes.length > 1 ? partes.sublist(1).join(' ') : '';
       final km = int.tryParse(_kilometrajeController.text.trim());
-      final aMatricula = int.tryParse(
-        _anioMatriculacionController.text.trim(),
-      );
+      final aMatricula = int.tryParse(_anioMatriculacionController.text.trim());
 
       if (_isEditing) {
         final updatedVehicle = Vehicle(
@@ -238,10 +228,10 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
         fontSize: 13,
         fontWeight: FontWeight.w400,
         height: 18 / 13,
-        color: _carbonBlack,
+        color: AppColors.carbonBlack,
       ),
       filled: true,
-      fillColor: _cloudWhite,
+      fillColor: AppColors.cloudWhite,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -251,7 +241,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _primaryBlue, width: 1),
+        borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1),
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -265,7 +255,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _screenBackground,
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -286,7 +276,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                               icon: const Icon(
                                 Icons.chevron_left,
                                 size: 30,
-                                color: _primaryBlue,
+                                color: AppColors.primaryBlue,
                               ),
                               padding: EdgeInsets.zero,
                             ),
@@ -302,7 +292,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                   height: 22 / 18,
-                                  color: _primaryBlue,
+                                  color: AppColors.primaryBlue,
                                 ),
                               ),
                             ),
@@ -316,14 +306,14 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                       width: double.infinity,
                       height: 120,
                       decoration: BoxDecoration(
-                        color: _cloudWhite,
+                        color: AppColors.cloudWhite,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Center(
                         child: Icon(
                           Icons.image_outlined,
                           size: 64,
-                          color: _carbonBlack,
+                          color: AppColors.carbonBlack,
                         ),
                       ),
                     ),
@@ -348,7 +338,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           height: 18 / 13,
-                          color: _carbonBlack,
+                          color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(),
                       ),
@@ -360,19 +350,19 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                         initialValue: _tipoSeleccionado,
                         icon: const Icon(
                           Icons.keyboard_arrow_down,
-                          color: _actionOrange,
+                          color: AppColors.actionOrange,
                         ),
                         style: const TextStyle(
                           fontFamily: 'Roboto',
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           height: 18 / 13,
-                          color: _carbonBlack,
+                          color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(
                           hintText: 'Tipo de vehículo',
                         ),
-                        dropdownColor: _cloudWhite,
+                        dropdownColor: AppColors.cloudWhite,
                         items: _tiposVehiculo
                             .map(
                               (tipo) => DropdownMenuItem<String>(
@@ -398,7 +388,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           height: 18 / 13,
-                          color: _carbonBlack,
+                          color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(hintText: 'Matricula'),
                       ),
@@ -413,7 +403,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           height: 18 / 13,
-                          color: _carbonBlack,
+                          color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(hintText: 'Bastidor'),
                       ),
@@ -429,7 +419,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           height: 18 / 13,
-                          color: _carbonBlack,
+                          color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(
                           hintText: 'Kilometraje',
@@ -458,11 +448,10 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                             ? null
                             : _guardarVehiculo,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _actionOrange,
-                          foregroundColor: _carbonBlack,
-                          disabledBackgroundColor: _actionOrange.withValues(
-                            alpha: 0.6,
-                          ),
+                          backgroundColor: AppColors.actionOrange,
+                          foregroundColor: AppColors.carbonBlack,
+                          disabledBackgroundColor: AppColors.actionOrange
+                              .withValues(alpha: 0.6),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -474,7 +463,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                                 width: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.2,
-                                  color: _carbonBlack,
+                                  color: AppColors.carbonBlack,
                                 ),
                               )
                             : Text(
@@ -499,11 +488,10 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                             ? null
                             : _eliminarVehiculo,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _errorRed,
+                          backgroundColor: AppColors.errorRed,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: _errorRed.withValues(
-                            alpha: 0.6,
-                          ),
+                          disabledBackgroundColor: AppColors.errorRed
+                              .withValues(alpha: 0.6),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -533,86 +521,9 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                 ),
               ),
             ),
-            const _BottomTabBar(),
+            AppBottomNavBar(currentIndex: 0),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _BottomTabBar extends StatelessWidget {
-  const _BottomTabBar();
-
-  @override
-  Widget build(BuildContext context) {
-    Widget tabItem({
-      required IconData icon,
-      required String label,
-      required VoidCallback onTap,
-    }) {
-      return GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 2),
-            Icon(icon, color: secondarySteel, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                height: 18 / 13,
-                color: secondarySteel,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      height: 84,
-      padding: const EdgeInsets.fromLTRB(40, 12, 40, 17),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: secondarySteel, width: 0.6)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          tabItem(
-            icon: Icons.home_outlined,
-            label: 'Inicio',
-            onTap: () {
-              Navigator.of(
-                context,
-              ).pushNamedAndRemoveUntil('/home', (route) => false);
-            },
-          ),
-          tabItem(
-            icon: Icons.build_outlined,
-            label: 'Historial',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Historial: próximamente')),
-              );
-            },
-          ),
-          tabItem(
-            icon: Icons.account_circle_outlined,
-            label: 'Perfil',
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Perfil: próximamente')),
-              );
-            },
-          ),
-        ],
       ),
     );
   }

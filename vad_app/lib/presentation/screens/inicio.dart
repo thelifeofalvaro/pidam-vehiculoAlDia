@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:vad_app/data/models/vehicle_model.dart';
 import 'package:vad_app/data/repositories/vehicle_repository.dart';
+import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
-  static const Color _screenBackground = Color(0xFFEAEAEA);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final bool hasVehicles = vehicles.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: HomeScreen._screenBackground,
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   : _HomeEmptyState(onAddVehicle: goToCreate),
             ),
-            const _BottomTabBar(),
+            AppBottomNavBar(currentIndex: 0),
           ],
         ),
       ),
@@ -81,14 +81,6 @@ class _HomeEmptyState extends StatelessWidget {
   const _HomeEmptyState({required this.onAddVehicle});
 
   final VoidCallback onAddVehicle;
-
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _textSteel = Color(0xFF4A4A4A);
-  static const Color _carbonBlack = Color(0xFF1A1A1A);
-
-  static const String _emptyStateIconUrl =
-      'https://www.figma.com/api/mcp/asset/5823caa8-d23d-4df0-b6f7-6a03c9fef920';
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +97,7 @@ class _HomeEmptyState extends StatelessWidget {
               fontSize: 18,
               fontWeight: FontWeight.w600,
               height: 24 / 18,
-              color: _primaryBlue,
+              color: AppColors.primaryBlue,
             ),
           ),
           const Spacer(),
@@ -117,8 +109,8 @@ class _HomeEmptyState extends StatelessWidget {
                   SizedBox(
                     width: 90,
                     height: 90,
-                    child: Image.network(
-                      _emptyStateIconUrl,
+                    child: Image.asset(
+                      'assets/images/vacio_vehiculos.png',
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -131,7 +123,7 @@ class _HomeEmptyState extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       height: 24 / 18,
-                      color: _carbonBlack,
+                      color: AppColors.carbonBlack,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -143,7 +135,7 @@ class _HomeEmptyState extends StatelessWidget {
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
                       height: 22 / 15,
-                      color: _textSteel,
+                      color: AppColors.textSteel,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -153,8 +145,8 @@ class _HomeEmptyState extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onAddVehicle,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _actionOrange,
-                        foregroundColor: _carbonBlack,
+                        backgroundColor: AppColors.actionOrange,
+                        foregroundColor: AppColors.carbonBlack,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -194,15 +186,6 @@ class _HomeWithData extends StatelessWidget {
 
   final Future<void> Function() onRefresh;
 
-  static const Color _cloudWhite = Color(0xFFF4F7F6);
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _textSteel = Color(0xFF4A4A4A);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _carbonBlack = Color(0xFF1A1A1A);
-
-  static const String _carCardImageUrl =
-      'https://www.figma.com/api/mcp/asset/49c5018a-4aa6-4777-adc1-d3bf83796122';
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -220,7 +203,7 @@ class _HomeWithData extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   height: 24 / 18,
-                  color: _primaryBlue,
+                  color: AppColors.primaryBlue,
                 ),
               ),
               const SizedBox(height: 28),
@@ -231,7 +214,7 @@ class _HomeWithData extends StatelessWidget {
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   height: 28 / 22,
-                  color: _primaryBlue,
+                  color: AppColors.primaryBlue,
                 ),
               ),
               const SizedBox(height: 17),
@@ -258,7 +241,7 @@ class _HomeWithData extends StatelessWidget {
                         height: 110,
                         padding: const EdgeInsets.fromLTRB(16, 15, 20, 13),
                         decoration: BoxDecoration(
-                          color: _cloudWhite,
+                          color: AppColors.cloudWhite,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -266,8 +249,8 @@ class _HomeWithData extends StatelessWidget {
                             SizedBox(
                               width: 80,
                               height: 80,
-                              child: Image.network(
-                                _carCardImageUrl,
+                              child: Image.asset(
+                                'assets/images/vacio_vehiculos.png',
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -286,7 +269,7 @@ class _HomeWithData extends StatelessWidget {
                                       fontSize: 18,
                                       fontWeight: FontWeight.w600,
                                       height: 24 / 18,
-                                      color: _carbonBlack,
+                                      color: AppColors.carbonBlack,
                                     ),
                                   ),
                                   Text(
@@ -298,7 +281,7 @@ class _HomeWithData extends StatelessWidget {
                                       fontSize: 13,
                                       fontWeight: FontWeight.w400,
                                       height: 18 / 13,
-                                      color: _textSteel,
+                                      color: AppColors.textSteel,
                                     ),
                                   ),
                                   Text(
@@ -310,7 +293,7 @@ class _HomeWithData extends StatelessWidget {
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       height: 22 / 16,
-                                      color: _textSteel,
+                                      color: AppColors.textSteel,
                                     ),
                                   ),
                                 ],
@@ -319,7 +302,7 @@ class _HomeWithData extends StatelessWidget {
                             const SizedBox(width: 12),
                             const Icon(
                               Icons.chevron_right,
-                              color: _actionOrange,
+                              color: AppColors.actionOrange,
                               size: 24,
                             ),
                           ],
@@ -340,8 +323,8 @@ class _HomeWithData extends StatelessWidget {
             height: 56,
             child: FloatingActionButton(
               onPressed: onAddVehicle,
-              backgroundColor: _actionOrange,
-              foregroundColor: _carbonBlack,
+              backgroundColor: AppColors.actionOrange,
+              foregroundColor: AppColors.carbonBlack,
               elevation: 0,
               shape: const CircleBorder(),
               child: const Icon(Icons.add, size: 34),
@@ -349,81 +332,6 @@ class _HomeWithData extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _BottomTabBar extends StatelessWidget {
-  const _BottomTabBar();
-
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _secondarySteel = Color(0xFF708090);
-
-  @override
-  Widget build(BuildContext context) {
-    Widget tabItem({
-      required IconData icon,
-      required String label,
-      required bool isActive,
-      VoidCallback? onTap,
-    }) {
-      final Color color = isActive ? _primaryBlue : _secondarySteel;
-      return GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                height: 18 / 13,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      height: 84,
-      padding: const EdgeInsets.fromLTRB(40, 12, 40, 17),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _secondarySteel, width: 0.6)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          tabItem(icon: Icons.home, label: 'Inicio', isActive: true),
-          tabItem(
-            icon: Icons.build,
-            label: 'Historial',
-            isActive: false,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Historial: próximamente')),
-              );
-            },
-          ),
-          tabItem(
-            icon: Icons.account_circle_outlined,
-            label: 'Perfil',
-            isActive: false,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Perfil: próximamente')),
-              );
-            },
-          ),
-        ],
-      ),
     );
   }
 }

@@ -2,20 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vad_app/core/app_color.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
 import '../../../data/repositories/intervention_repository.dart';
-
-// Color tokens from Figma design
-const Color primaryBlue = Color(0xFF0047AB);
-const Color actionOrange = Color(0xFFFF8C00);
-const Color errorRed = Color(0xFFD32F2F);
-const Color titleBlack = Color(0xFF1A1A1A);
-const Color textGray = Color(0xFF4A4A4A);
-const Color secondaryGray = Color(0xFF708090);
-const Color cardWhite = Color(0xFFFFFFFF);
-const Color bgLightBlue = Color(0xFFF4F7F6);
 
 class InterventionManageScreen extends StatefulWidget {
   const InterventionManageScreen({super.key});
@@ -271,18 +262,18 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: cardWhite,
+      backgroundColor: AppColors.cardWhite,
       appBar: AppBar(
-        backgroundColor: cardWhite,
+        backgroundColor: AppColors.cardWhite,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryBlue),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primaryBlue),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           isEditing ? 'Editar Intervención' : 'Nueva Intervención',
           style: const TextStyle(
-            color: primaryBlue,
+            color: AppColors.primaryBlue,
             fontSize: 18,
             fontWeight: FontWeight.w600,
             fontFamily: 'Inter',
@@ -354,7 +345,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                 child: ElevatedButton(
                   onPressed: save,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: actionOrange,
+                    backgroundColor: AppColors.actionOrange,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -365,7 +356,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: titleBlack,
+                      color: AppColors.carbonBlack,
                       fontFamily: 'Inter',
                     ),
                   ),
@@ -381,7 +372,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                   child: ElevatedButton(
                     onPressed: delete,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: errorRed,
+                      backgroundColor: AppColors.errorRed,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -392,7 +383,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: cardWhite,
+                        color: AppColors.cardWhite,
                         fontFamily: 'Inter',
                       ),
                     ),
@@ -414,7 +405,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: bgLightBlue,
+        color: AppColors.cloudWhite,
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButtonFormField<String>(
@@ -423,7 +414,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           border: InputBorder.none,
           labelText: label,
           labelStyle: const TextStyle(
-            color: titleBlack,
+            color: AppColors.carbonBlack,
             fontSize: 16,
             fontWeight: FontWeight.w500,
             fontFamily: 'Inter',
@@ -448,7 +439,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: bgLightBlue,
+        color: AppColors.cloudWhite,
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(
@@ -458,7 +449,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           border: InputBorder.none,
           labelText: label,
           labelStyle: const TextStyle(
-            color: titleBlack,
+            color: AppColors.carbonBlack,
             fontSize: 16,
             fontWeight: FontWeight.w500,
             fontFamily: 'Inter',
@@ -474,19 +465,23 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
-          color: bgLightBlue,
+          color: AppColors.cloudWhite,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, color: titleBlack, size: 24),
+            const Icon(
+              Icons.calendar_today,
+              color: AppColors.carbonBlack,
+              size: 24,
+            ),
             const SizedBox(width: 10),
             Text(
               fechaSeleccionada != null
                   ? DateFormat('dd/MM/yyyy').format(fechaSeleccionada!)
                   : 'Fecha',
               style: const TextStyle(
-                color: titleBlack,
+                color: AppColors.carbonBlack,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Inter',
@@ -512,22 +507,22 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: bgLightBlue,
+          color: AppColors.cloudWhite,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: bgLightBlue, width: 1.5),
+          border: Border.all(color: AppColors.cloudWhite, width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               hasFile ? Icons.delete_outline : Icons.attach_file,
-              color: hasFile ? errorRed : titleBlack,
+              color: hasFile ? AppColors.errorRed : AppColors.carbonBlack,
             ),
             const SizedBox(width: 8),
             Text(
               hasFile ? 'Eliminar documento' : 'Adjuntar documento',
               style: TextStyle(
-                color: hasFile ? errorRed : titleBlack,
+                color: hasFile ? AppColors.errorRed : AppColors.carbonBlack,
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
                 fontFamily: 'Roboto',
@@ -543,7 +538,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: BoxDecoration(
-        color: bgLightBlue,
+        color: AppColors.cloudWhite,
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(
@@ -553,7 +548,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           border: InputBorder.none,
           hintText: 'Notas...',
           hintStyle: TextStyle(
-            color: titleBlack,
+            color: AppColors.carbonBlack,
             fontSize: 13,
             fontWeight: FontWeight.w400,
             fontFamily: 'Roboto',

@@ -1,19 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vad_app/core/app_color.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart';
 import '../../../data/repositories/intervention_repository.dart';
-
-const Color primaryBlue = Color(0xFF0047AB);
-const Color actionOrange = Color(0xFFFF8C00);
-const Color titleBlack = Color(0xFF1A1A1A);
-const Color textGray = Color(0xFF4A4A4A);
-const Color secondaryGray = Color(0xFF708090);
-const Color cardWhite = Color(0xFFFFFFFF);
-const Color bgLightBlue = Color(0xFFF4F7F6);
-const Color errorRed = Color(0xFFFF4C4C);
 
 class InterventionListScreen extends StatefulWidget {
   final Vehicle vehicle;
@@ -58,17 +50,14 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
   Future<void> loadInterventions() async {
     try {
-      print('Cargando intervenciones...');
       final data = await _repository.getInterventionsByVehicle(
         widget.vehicle.id,
       );
-      print('Intervenciones obtenidas: ${data.length}');
       setState(() {
         interventions = data;
         isLoading = false;
       });
     } catch (e) {
-      print('ERROR CARGANDO INTERVENCIONES: $e');
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -85,7 +74,6 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       arguments: widget.vehicle,
     );
     if (result == true) {
-      print('Recargando lista tras crear intervención...');
       loadInterventions();
       hasChanges = true;
     }
@@ -125,9 +113,6 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
   ) async {
     try {
       final fileBytes = file.bytes!;
-      if (fileBytes == null) {
-        throw Exception('No se pudo leer el archivo');
-      }
       final fileName =
           '${intervention.id}_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
 
@@ -206,18 +191,18 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
         return false;
       },
       child: Scaffold(
-        backgroundColor: cardWhite,
+        backgroundColor: AppColors.cardWhite,
         appBar: AppBar(
-          backgroundColor: cardWhite,
+          backgroundColor: AppColors.cardWhite,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: primaryBlue),
+            icon: const Icon(Icons.arrow_back, color: AppColors.primaryBlue),
             onPressed: () => Navigator.pop(context, hasChanges),
           ),
           title: const Text(
             'Historial Vehículo',
             style: TextStyle(
-              color: primaryBlue,
+              color: AppColors.primaryBlue,
               fontSize: 18,
               fontWeight: FontWeight.w600,
               fontFamily: 'Inter',
@@ -227,12 +212,14 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
         floatingActionButton: interventions.isNotEmpty
             ? FloatingActionButton(
                 onPressed: goToCreate,
-                backgroundColor: actionOrange,
-                child: const Icon(Icons.add, color: titleBlack),
+                backgroundColor: AppColors.actionOrange,
+                child: const Icon(Icons.add, color: AppColors.carbonBlack),
               )
             : null,
         body: isLoading
-            ? const Center(child: CircularProgressIndicator(color: primaryBlue))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryBlue),
+              )
             : interventions.isEmpty
             ? _buildEmptyState()
             : _buildDataState(),
@@ -256,14 +243,14 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     width: 90,
                     height: 90,
                     decoration: BoxDecoration(
-                      color: bgLightBlue,
+                      color: AppColors.cloudWhite,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: secondaryGray, width: 1),
+                      border: Border.all(color: AppColors.textSteel, width: 1),
                     ),
                     child: const Icon(
                       Icons.assignment_outlined,
                       size: 50,
-                      color: secondaryGray,
+                      color: AppColors.textSteel,
                     ),
                   ),
                   const SizedBox(height: 22),
@@ -272,7 +259,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: titleBlack,
+                      color: AppColors.carbonBlack,
                       fontFamily: 'Inter',
                     ),
                     textAlign: TextAlign.center,
@@ -283,7 +270,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
-                      color: textGray,
+                      color: AppColors.textSteel,
                       fontFamily: 'Inter',
                     ),
                     textAlign: TextAlign.center,
@@ -295,7 +282,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     child: ElevatedButton(
                       onPressed: goToCreate,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: actionOrange,
+                        backgroundColor: AppColors.actionOrange,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -306,7 +293,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: titleBlack,
+                          color: AppColors.carbonBlack,
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -361,7 +348,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: bgLightBlue,
+                  color: AppColors.cloudWhite,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -374,7 +361,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w400,
-                            color: titleBlack,
+                            color: AppColors.carbonBlack,
                             fontFamily: 'Inter',
                           ),
                         ),
@@ -385,8 +372,11 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: cardWhite,
-                            border: Border.all(color: titleBlack, width: 1),
+                            color: AppColors.cardWhite,
+                            border: Border.all(
+                              color: AppColors.carbonBlack,
+                              width: 1,
+                            ),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -394,7 +384,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
-                              color: titleBlack,
+                              color: AppColors.carbonBlack,
                               fontFamily: 'Roboto',
                             ),
                           ),
@@ -410,7 +400,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              color: textGray,
+                              color: AppColors.textSteel,
                               fontFamily: 'Inter',
                             ),
                           ),
@@ -419,7 +409,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: titleBlack,
+                              color: AppColors.carbonBlack,
                               fontFamily: 'Inter',
                             ),
                           ),
@@ -458,14 +448,14 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: bgLightBlue,
+                color: AppColors.cloudWhite,
                 shape: BoxShape.circle,
-                border: Border.all(color: secondaryGray, width: 2),
+                border: Border.all(color: AppColors.textSteel, width: 2),
               ),
               child: Icon(
                 _getInterventionIcon(intervention.tipoIntervencion),
                 size: 16,
-                color: secondaryGray,
+                color: AppColors.textSteel,
               ),
             ),
             // Vertical line
@@ -473,7 +463,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
               Container(
                 width: 2,
                 height: 72,
-                color: secondaryGray,
+                color: AppColors.textSteel,
                 margin: const EdgeInsets.symmetric(vertical: 4),
               ),
           ],
@@ -487,7 +477,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: bgLightBlue,
+                color: AppColors.cloudWhite,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -501,7 +491,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: titleBlack,
+                            color: AppColors.carbonBlack,
                             fontFamily: 'Inter',
                           ),
                         ),
@@ -514,7 +504,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                           child: Icon(
                             Icons.attach_file,
                             size: 18,
-                            color: secondaryGray,
+                            color: AppColors.textSteel,
                           ),
                         ),
                     ],
@@ -531,7 +521,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: textGray,
+                          color: AppColors.textSteel,
                           fontFamily: 'Roboto',
                         ),
                       ),
@@ -545,7 +535,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
-                          color: secondaryGray,
+                          color: AppColors.textSteel,
                           fontFamily: 'Roboto',
                         ),
                       ),
@@ -554,7 +544,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: titleBlack,
+                          color: AppColors.carbonBlack,
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -579,9 +569,9 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? primaryBlue : cardWhite,
+          color: isSelected ? AppColors.primaryBlue : AppColors.cardWhite,
           border: Border.all(
-            color: isSelected ? primaryBlue : primaryBlue,
+            color: isSelected ? AppColors.primaryBlue : AppColors.primaryBlue,
             width: 1.5,
           ),
           borderRadius: BorderRadius.circular(20),
@@ -591,7 +581,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w400,
-            color: isSelected ? cardWhite : primaryBlue,
+            color: isSelected ? AppColors.cardWhite : AppColors.primaryBlue,
             fontFamily: 'Roboto',
           ),
         ),
@@ -625,7 +615,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
               /// Editar Intervención
               ListTile(
-                leading: const Icon(Icons.edit, color: primaryBlue),
+                leading: const Icon(Icons.edit, color: AppColors.primaryBlue),
                 title: const Text('Editar intervención'),
                 onTap: () async {
                   Navigator.pop(context);
@@ -646,7 +636,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
               if (intervention.urlAdjunto != null &&
                   intervention.urlAdjunto!.isNotEmpty)
                 ListTile(
-                  leading: const Icon(Icons.delete, color: errorRed),
+                  leading: const Icon(Icons.delete, color: AppColors.errorRed),
                   title: const Text('Eliminar archivo'),
                   onTap: () async {
                     Navigator.pop(context);
@@ -685,7 +675,10 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
               if (intervention.urlAdjunto == null ||
                   intervention.urlAdjunto!.isEmpty)
                 ListTile(
-                  leading: const Icon(Icons.attach_file, color: actionOrange),
+                  leading: const Icon(
+                    Icons.attach_file,
+                    color: AppColors.actionOrange,
+                  ),
                   title: const Text('Añadir archivo'),
                   onTap: () {
                     Navigator.pop(context);

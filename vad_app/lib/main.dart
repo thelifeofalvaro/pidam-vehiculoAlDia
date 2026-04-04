@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vad_app/features/profile/screens/profile_screen.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_list_screen.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_manage_screen.dart';
 import 'package:vad_app/features/vehicles/screens/vehicle_detail_screen.dart';
@@ -21,6 +22,12 @@ void main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeWZ6Ymh3cG53bXNsb3FtbWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTcxMTUsImV4cCI6MjA4ODAzMzExNX0.o7pGAc4FW3q3Yt_6I2Pq1D_y9_EcoGOBjVGy8Eu2PMU',
   );
+
+  //PARA CUANDO FINALICE EL DESARROLLO Y QUIERA USAR VARIABLES DE ENTORNO EN LUGAR DE CLAVES HARDCODEADAS
+  //await Supabase.initialize(
+  //  url: const String.fromEnvironment('SUPABASE_URL'),
+  //  anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+  // );
 
   runApp(const MyApp());
 }
@@ -48,6 +55,7 @@ class MyApp extends StatelessWidget {
           return InterventionListScreen(vehicle: vehicle);
         },
         '/intervention-manage': (context) => const InterventionManageScreen(),
+        '/profile': (context) => const ProfileScreen(),
       },
 
       localizationsDelegates: const [

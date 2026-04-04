@@ -1,0 +1,3 @@
+flutter run 
+--dart-define=SUPABASE_URL=https://vfyfzbhwpnwmsloqmmdd.supabase.co 
+--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmeWZ6Ymh3cG53bXNsb3FtbWRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NTcxMTUsImV4cCI6MjA4MDMzMTExNX0.o7pGAc4FW3q3Yt_6I2Pq1D_y9_EcoGOBjVGy8Eu2PMU

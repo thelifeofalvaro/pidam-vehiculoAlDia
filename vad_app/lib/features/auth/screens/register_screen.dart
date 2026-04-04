@@ -2,6 +2,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:vad_app/core/app_color.dart';
+
 import '../../../data/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -12,17 +14,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  static const String _backIconUrl =
-      'https://www.figma.com/api/mcp/asset/6596c2e9-9512-4aad-9df6-5e1412ccd33b';
-
-  static const Color _primaryBlue = Color(0xFF0047AB);
-  static const Color _actionOrange = Color(0xFFFF8C00);
-  static const Color _textSteel = Color(0xFF4A4A4A);
-  static const Color _secondarySteel = Color(0xFF708090);
-  static const Color _cloudWhite = Color(0xFFF4F7F6);
-  static const Color _carbonBlack = Color(0xFF1A1A1A);
-  static const Color _screenBackground = Color(0xFFEAEAEA);
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -61,19 +52,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: passwordController.text.trim(),
       );
 
+      if (!mounted) return;
+
       // Volver al login tras registrarse
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Usuario creado correctamente')),
+        const SnackBar(
+          content: Text(
+            'Usuario creado correctamente. Valida tu correo para iniciar sesión.',
+          ),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
-
-    setState(() => isLoading = false);
   }
 
   @override
@@ -88,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _screenBackground,
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -99,13 +98,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 16),
-                  InkWell(
-                    onTap: () => Navigator.pop(context),
-                    borderRadius: BorderRadius.circular(4),
-                    child: SizedBox(
-                      height: 25,
-                      width: 18,
-                      child: Image.network(_backIconUrl, fit: BoxFit.contain),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      size: 28,
+                      color: AppColors.carbonBlack,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -116,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
                       height: 28 / 22,
-                      color: _primaryBlue,
+                      color: AppColors.primaryBlue,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -127,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
                       height: 22 / 15,
-                      color: _secondarySteel,
+                      color: AppColors.secondarySteel,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -141,10 +139,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: _textSteel,
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
-                      fillColor: _cloudWhite,
+                      fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -156,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
-                          color: _primaryBlue,
+                          color: AppColors.primaryBlue,
                           width: 1.2,
                         ),
                       ),
@@ -177,10 +175,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: _textSteel,
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
-                      fillColor: _cloudWhite,
+                      fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -192,7 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
-                          color: _primaryBlue,
+                          color: AppColors.primaryBlue,
                           width: 1.2,
                         ),
                       ),
@@ -213,10 +211,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: _textSteel,
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
-                      fillColor: _cloudWhite,
+                      fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -228,7 +226,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
-                          color: _primaryBlue,
+                          color: AppColors.primaryBlue,
                           width: 1.2,
                         ),
                       ),
@@ -249,10 +247,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: _textSteel,
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
-                      fillColor: _cloudWhite,
+                      fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
@@ -264,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: const BorderSide(
-                          color: _primaryBlue,
+                          color: AppColors.primaryBlue,
                           width: 1.2,
                         ),
                       ),
@@ -281,11 +279,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: ElevatedButton(
                       onPressed: isLoading ? null : register,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _actionOrange,
-                        foregroundColor: _carbonBlack,
-                        disabledBackgroundColor: _actionOrange.withValues(
-                          alpha: 0.6,
-                        ),
+                        backgroundColor: AppColors.actionOrange,
+                        foregroundColor: AppColors.carbonBlack,
+                        disabledBackgroundColor: AppColors.actionOrange
+                            .withValues(alpha: 0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -298,7 +295,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  _carbonBlack,
+                                  AppColors.carbonBlack,
                                 ),
                               ),
                             )
@@ -326,14 +323,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             fontSize: 15,
                             fontWeight: FontWeight.w400,
                             height: 22 / 15,
-                            color: _textSteel,
+                            color: AppColors.textSteel,
                           ),
                         ),
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
                         style: TextButton.styleFrom(
-                          foregroundColor: _primaryBlue,
+                          foregroundColor: AppColors.primaryBlue,
                           padding: const EdgeInsets.only(left: 10),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
