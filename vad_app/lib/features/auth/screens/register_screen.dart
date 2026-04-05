@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vad_app/core/app_color.dart';
 
 import '../../../data/services/auth_service.dart';
@@ -36,6 +37,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    if (nameController.text.contains(' ')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El nombre no puede contener espacios')),
+      );
+      return;
+    }
+
     if (passwordController.text.trim() !=
         confirmPasswordController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,6 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await _authService.signUp(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
+        nombre: nameController.text.trim(),
       );
 
       if (!mounted) return;
@@ -132,6 +141,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextField(
                     controller: nameController,
                     textCapitalization: TextCapitalization.words,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                    ],
                     decoration: InputDecoration(
                       hintText: 'Nombre:',
                       hintStyle: const TextStyle(

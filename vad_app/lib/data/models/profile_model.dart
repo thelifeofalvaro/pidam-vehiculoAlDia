@@ -23,4 +23,18 @@ class Profile {
       'avatar_url': avatarUrl,
     };
   }
+
+  Profile copyWith({
+    String? id,
+    String? nombre,
+    String? email,
+    String? avatarUrl,
+  }) {
+    return Profile(
+      id: id ?? this.id,
+      nombre: nombre ?? this.nombre,
+      email: email ?? this.email,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+    );
+  }
 }

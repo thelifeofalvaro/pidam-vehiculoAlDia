@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../../core/app_color.dart';
 import '../../../core/app_text_styles.dart';
 import '../../../data/repositories/profile_repository.dart';
@@ -74,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _cancelEdit() {
-    // Restaurar valores originales
+    // Restaura valores originales
     if (_profile != null) {
       _nameController.text = _profile!.nombre ?? '';
       _emailController.text = _profile!.email ?? '';
@@ -107,12 +110,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
 
-    setState(() => _isSaving = true);
+    if (_nameController.text.contains(' ')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El nombre no puede contener espacios')),
+      );
+      return;
+    }
+
+    await _loadProfile();
+
+    setState(() {
+      _isEditing = false;
+    });
 
     try {
       final updated = Profile(
         id: _profile!.id,
-        nombre: _nameController.text.trim(),
+        nombre: _nameController.text.trim().replaceAll(' ', ''),
         email: _profile!.email,
         avatarUrl: _profile!.avatarUrl,
       );
@@ -182,7 +196,127 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // ── Input decoration ──────────────────────────────────
+  Future<void> _pickAndUploadProfileImage() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png'],
+        withData: true,
+      );
+
+      if (result == null) return;
+
+      final file = result.files.first;
+
+      if (file.size > 2 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('La imagen supera los 2MB')),
+        );
+        return;
+      }
+
+      final bytes = file.bytes!;
+      final supabase = Supabase.instance.client;
+      final userId = supabase.auth.currentUser!.id;
+
+      final fileName = 'profile_$userId.${file.extension}';
+      final path = 'profiles/$fileName';
+
+      await supabase.storage
+          .from('usuarios')
+          .uploadBinary(
+            path,
+            bytes,
+            fileOptions: const FileOptions(upsert: true),
+          );
+
+      final publicUrl = supabase.storage.from('usuarios').getPublicUrl(path);
+
+      await supabase
+          .from('usuarios')
+          .update({'avatar_url': publicUrl})
+          .eq('id', userId);
+
+      setState(() {
+        _profile = _profile?.copyWith(avatarUrl: publicUrl);
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Foto actualizada')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error subiendo imagen: $e')));
+    }
+  }
+
+  Future<void> _deleteProfileImage() async {
+    try {
+      if (_profile?.avatarUrl == null) return;
+
+      final supabase = Supabase.instance.client;
+
+      final uri = Uri.parse(_profile!.avatarUrl!);
+      final filePath = uri.pathSegments.skip(2).join('/');
+
+      await supabase.storage.from('usuarios').remove([filePath]);
+
+      final userId = supabase.auth.currentUser!.id;
+
+      await supabase
+          .from('usuarios')
+          .update({'avatar_url': null})
+          .eq('id', userId);
+
+      setState(() {
+        _profile = _profile?.copyWith(avatarUrl: null);
+      });
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Foto eliminada')));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error eliminando imagen: $e')));
+    }
+  }
+
+  void _onAvatarTap() {
+    if (_profile?.avatarUrl != null && _profile!.avatarUrl!.isNotEmpty) {
+      showModalBottomSheet(
+        context: context,
+        builder: (_) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.refresh),
+                title: const Text('Cambiar foto'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickAndUploadProfileImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: AppColors.errorRed),
+                title: const Text('Eliminar foto'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteProfileImage();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      _pickAndUploadProfileImage();
+    }
+  }
+
+  // UI
   InputDecoration _inputDecoration({Widget? suffixIcon}) {
     return InputDecoration(
       suffixIcon: suffixIcon,
@@ -208,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Campo editable con label encima ───────────────────
+  // Campo editable
   Widget _formField({
     required String label,
     required TextEditingController controller,
@@ -239,7 +373,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Campo solo lectura (modo ver) ─────────────────────
+  // Campo solo lectura
   Widget _readOnlyField({required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,7 +400,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // ── Campo contraseña solo lectura (••••••••) ──────────
+  //  Campo contraseña (lectura), caracteres ocultos
   Widget _readOnlyPasswordField({required String label}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,73 +450,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   vertical: 12,
                 ),
                 child: Center(
-                  child: ConstrainedBox(
-                    // Responsive: máximo 480px en tablet/web,
-                    // ocupa todo el ancho en móvil
-                    constraints: const BoxConstraints(maxWidth: 480),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // ── Top bar ─────────────────────────────
-                        SizedBox(
-                          height: 44,
-                          child: Row(
-                            children: [
-                              // Izquierda: flecha atrás (ver) o X cancelar (editar)
-                              SizedBox(
-                                width: 40,
-                                child: IconButton(
-                                  onPressed: _isEditing
-                                      ? _cancelEdit
-                                      : () => Navigator.pop(context),
-                                  icon: Icon(
-                                    _isEditing
-                                        ? Icons.close
-                                        : Icons.chevron_left,
-                                    size: _isEditing ? 24 : 28,
-                                    color: _isEditing
-                                        ? AppColors.secondarySteel
-                                        : AppColors.actionOrange,
-                                  ),
-                                  padding: EdgeInsets.zero,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 44,
+                        child: Row(
+                          children: [
+                            // Izquierda: flecha atrás (ver) o X cancelar (editar)
+                            SizedBox(
+                              width: 40,
+                              child: IconButton(
+                                onPressed: _isEditing
+                                    ? _cancelEdit
+                                    : () => Navigator.pop(context),
+                                icon: Icon(
+                                  _isEditing ? Icons.close : Icons.chevron_left,
+                                  size: _isEditing ? 24 : 28,
+                                  color: _isEditing
+                                      ? AppColors.errorRed
+                                      : AppColors.actionOrange,
                                 ),
+                                padding: EdgeInsets.zero,
                               ),
+                            ),
 
-                              // Centro: título
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    'Perfil Usuario',
-                                    style: AppTextStyles.heading2.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                            // Centro: título
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  'Perfil Usuario',
+                                  style: AppTextStyles.heading2.copyWith(
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
                               ),
+                            ),
 
-                              // Derecha: lápiz editar (ver) o vacío (editar)
-                              SizedBox(
-                                width: 40,
-                                child: _isEditing
-                                    ? null
-                                    : IconButton(
-                                        onPressed: _enterEditMode,
-                                        icon: const Icon(
-                                          Icons.edit_square,
-                                          size: 22,
-                                          color: AppColors.carbonBlack,
-                                        ),
-                                        padding: EdgeInsets.zero,
+                            // Derecha: lápiz editar (ver) o vacío (editar)
+                            SizedBox(
+                              width: 40,
+                              child: _isEditing
+                                  ? null
+                                  : IconButton(
+                                      onPressed: _enterEditMode,
+                                      icon: const Icon(
+                                        Icons.edit_outlined,
+                                        size: 22,
+                                        color: AppColors.primaryBlue,
                                       ),
-                              ),
-                            ],
-                          ),
+                                      padding: EdgeInsets.zero,
+                                    ),
+                            ),
+                          ],
                         ),
+                      ),
 
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 24),
 
-                        // ── Avatar ───────────────────────────────
-                        Center(
+                      // Avatar circular con icono persona
+                      Center(
+                        child: GestureDetector(
+                          onTap: _onAvatarTap,
                           child: Container(
                             width: 80,
                             height: 80,
@@ -393,164 +522,233 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 color: AppColors.primaryBlue,
                                 width: 1.5,
                               ),
+                              image:
+                                  (_profile?.avatarUrl != null &&
+                                      _profile!.avatarUrl!.isNotEmpty)
+                                  ? DecorationImage(
+                                      image: NetworkImage(_profile!.avatarUrl!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                             ),
-                            child: const Icon(
-                              Icons.person_outline,
-                              size: 44,
-                              color: AppColors.primaryBlue,
+                            child:
+                                (_profile?.avatarUrl == null ||
+                                    _profile!.avatarUrl!.isEmpty)
+                                ? const Icon(
+                                    Icons.person_outline,
+                                    size: 44,
+                                    color: AppColors.primaryBlue,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // VER
+                      if (!_isEditing) ...[
+                        _readOnlyField(
+                          label: 'Nombre Usuario',
+                          value: _profile?.nombre ?? '',
+                        ),
+                        const SizedBox(height: 16),
+                        _readOnlyField(
+                          label: 'Email',
+                          value: _profile?.email ?? '',
+                        ),
+                        const SizedBox(height: 16),
+                        _readOnlyPasswordField(label: 'Contraseña'),
+                      ],
+
+                      const SizedBox(height: 32),
+
+                      // Boton para cerrar sesión
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _isSaving || _isDeleting
+                              ? null
+                              : () async {
+                                  await _authService.signOut();
+
+                                  if (!mounted) return;
+
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    '/login',
+                                    (route) => false,
+                                  );
+                                  // Confirmación de cierre de sesión
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Cerrar sesión'),
+                                      content: const Text(
+                                        '¿Quieres cerrar sesión?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(ctx, false),
+                                          child: const Text('Cancelar'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(ctx, true),
+                                          child: const Text('Cerrar sesión'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirm != true) return;
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.errorRed.withValues(
+                              alpha: 0.85,
+                            ),
+                            foregroundColor: AppColors.cardWhite,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text('Cerrar sesión'),
+                        ),
+                      ),
+
+                      // Editar
+                      if (_isEditing) ...[
+                        _formField(
+                          label: 'Nombre',
+                          controller: _nameController,
+                          keyboardType: TextInputType.name,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Email visible pero bloqueado
+                        _formField(
+                          label: 'Email',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          enabled: false,
+                        ),
+                        const SizedBox(height: 16),
+
+                        _formField(
+                          label: 'Contraseña',
+                          controller: _passwordController,
+                          obscure: _obscurePassword,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AppColors.secondarySteel,
+                              size: 20,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
 
+                        _formField(
+                          label: 'Confirmar Contraseña',
+                          controller: _confirmPasswordController,
+                          obscure: _obscureConfirm,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirm
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AppColors.secondarySteel,
+                              size: 20,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscureConfirm = !_obscureConfirm,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 32),
 
-                        // ── MODO VER ─────────────────────────────
-                        if (!_isEditing) ...[
-                          _readOnlyField(
-                            label: 'Nombre',
-                            value: _profile?.nombre ?? '',
-                          ),
-                          const SizedBox(height: 16),
-                          _readOnlyField(
-                            label: 'Email',
-                            value: _profile?.email ?? '',
-                          ),
-                          const SizedBox(height: 16),
-                          _readOnlyPasswordField(label: 'Contraseña'),
-                        ],
-
-                        // ── MODO EDITAR ──────────────────────────
-                        if (_isEditing) ...[
-                          _formField(
-                            label: 'Nombre',
-                            controller: _nameController,
-                            keyboardType: TextInputType.name,
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Email visible pero bloqueado
-                          _formField(
-                            label: 'Email',
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            enabled: false,
-                          ),
-                          const SizedBox(height: 16),
-
-                          _formField(
-                            label: 'Contraseña',
-                            controller: _passwordController,
-                            obscure: _obscurePassword,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: AppColors.secondarySteel,
-                                size: 20,
+                        // Boton Guardar Cambios
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: (_isSaving || _isDeleting)
+                                ? null
+                                : _saveProfile,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.actionOrange,
+                              foregroundColor: AppColors.carbonBlack,
+                              disabledBackgroundColor: AppColors.actionOrange
+                                  .withValues(alpha: 0.6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword,
-                              ),
+                              elevation: 0,
                             ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          _formField(
-                            label: 'Confirmar Contraseña',
-                            controller: _confirmPasswordController,
-                            obscure: _obscureConfirm,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureConfirm
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: AppColors.secondarySteel,
-                                size: 20,
-                              ),
-                              onPressed: () => setState(
-                                () => _obscureConfirm = !_obscureConfirm,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Botón Guardar Cambios
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: (_isSaving || _isDeleting)
-                                  ? null
-                                  : _saveProfile,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.actionOrange,
-                                foregroundColor: AppColors.carbonBlack,
-                                disabledBackgroundColor: AppColors.actionOrange
-                                    .withValues(alpha: 0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: _isSaving
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.2,
-                                        color: AppColors.carbonBlack,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Guardar Cambios',
-                                      style: AppTextStyles.button,
+                            child: _isSaving
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.2,
+                                      color: AppColors.carbonBlack,
                                     ),
-                            ),
+                                  )
+                                : Text(
+                                    'Guardar Cambios',
+                                    style: AppTextStyles.button,
+                                  ),
                           ),
+                        ),
 
-                          const SizedBox(height: 12),
+                        const SizedBox(height: 12),
 
-                          // Botón Eliminar Perfil
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: (_isSaving || _isDeleting)
-                                  ? null
-                                  : _deleteProfile,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.errorRed,
-                                foregroundColor: AppColors.cardWhite,
-                                disabledBackgroundColor: AppColors.errorRed
-                                    .withValues(alpha: 0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 0,
+                        // Boton Eliminar Perfil
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: (_isSaving || _isDeleting)
+                                ? null
+                                : _deleteProfile,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.errorRed,
+                              foregroundColor: AppColors.cardWhite,
+                              disabledBackgroundColor: AppColors.errorRed
+                                  .withValues(alpha: 0.6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                              child: _isDeleting
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.2,
-                                        color: AppColors.cardWhite,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Eliminar Perfil',
-                                      style: AppTextStyles.button.copyWith(
-                                        color: AppColors.cardWhite,
-                                      ),
-                                    ),
+                              elevation: 0,
                             ),
+                            child: _isDeleting
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.2,
+                                      color: AppColors.cardWhite,
+                                    ),
+                                  )
+                                : Text(
+                                    'Eliminar Perfil',
+                                    style: AppTextStyles.button.copyWith(
+                                      color: AppColors.cardWhite,
+                                    ),
+                                  ),
                           ),
-                        ],
-
-                        const SizedBox(height: 24),
+                        ),
                       ],
-                    ),
+
+                      const SizedBox(height: 24),
+                    ],
                   ),
                 ),
               ),

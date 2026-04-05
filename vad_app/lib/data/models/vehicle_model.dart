@@ -8,6 +8,7 @@ class Vehicle {
   final int? anioMatriculacion;
   final String? bastidor;
   final int? kmVh;
+  final String? imageUrl;
 
   Vehicle({
     required this.id,
@@ -19,6 +20,7 @@ class Vehicle {
     this.anioMatriculacion,
     this.bastidor,
     this.kmVh,
+    this.imageUrl,
   });
 
   /// JSON → objeto
@@ -33,6 +35,7 @@ class Vehicle {
       anioMatriculacion: json['a_matricula'],
       bastidor: json['bastidor'],
       kmVh: json['km_vh'],
+      imageUrl: json['image_url'],
     );
   }
 
@@ -47,6 +50,7 @@ class Vehicle {
       'a_matricula': anioMatriculacion,
       'bastidor': bastidor,
       'km_vh': kmVh,
+      'image_url': imageUrl,
     };
   }
 
@@ -61,6 +65,7 @@ class Vehicle {
     int? anioMatriculacion,
     String? bastidor,
     int? kmVh,
+    String? imageUrl,
   }) {
     return Vehicle(
       id: id ?? this.id,
@@ -72,6 +77,7 @@ class Vehicle {
       anioMatriculacion: anioMatriculacion ?? this.anioMatriculacion,
       bastidor: bastidor ?? this.bastidor,
       kmVh: kmVh ?? this.kmVh,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }
