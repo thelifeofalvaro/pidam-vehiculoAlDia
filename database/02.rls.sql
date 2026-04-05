@@ -23,7 +23,8 @@ WITH CHECK (auth.uid() = id);
 CREATE POLICY "Usuario actualiza su perfil"
 ON usuarios
 FOR UPDATE
-USING (auth.uid() = id);
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
 
 -- =========================
 -- VEHICULOS
@@ -111,3 +112,15 @@ CREATE POLICY "Usuarios solo ven sus archivos"
 ON storage.objects
 FOR SELECT
 USING (auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Usuario ve su perfil
+create policy "Usuario puede ver su perfil"
+on public.usuarios
+for select
+using (auth.uid() = id);
+
+-- Usuario se crea en la BBDD
+create policy "Usuario puede insertarse"
+on public.usuarios
+for insert
+with check (auth.uid() = id);
