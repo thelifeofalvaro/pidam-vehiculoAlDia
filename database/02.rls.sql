@@ -111,3 +111,9 @@ CREATE POLICY "Usuarios solo ven sus archivos"
 ON storage.objects
 FOR SELECT
 USING (auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Usuario ve su perfil
+create policy "Usuario puede ver su perfil"
+on public.usuarios
+for select
+using (auth.uid() = id);
