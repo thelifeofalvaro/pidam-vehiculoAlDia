@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/utils/file_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart';
 import '../../../data/repositories/intervention_repository.dart';
+import 'dart:typed_data';
 
 class InterventionListScreen extends StatefulWidget {
   final Vehicle vehicle;
@@ -91,15 +93,19 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
       final file = result.files.first;
 
-      /// Validación tamaño (2MB)
-      if (file.size > 2 * 1024 * 1024) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('El archivo supera los 2MB')),
-        );
-        return;
-      }
+      final fileBytes = file.bytes;
+      if (fileBytes == null) return;
 
-      await _uploadToSupabase(intervention, file);
+      final processedBytes = await FileUtils.processFile(
+        bytes: fileBytes,
+        extension: file.extension ?? '',
+        context: context,
+      );
+      if (processedBytes == null) return;
+
+      await _uploadToSupabase(intervention, file, processedBytes);
+
+      await _uploadToSupabase(intervention, file, processedBytes);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error seleccionando archivo: $e')),
@@ -110,6 +116,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
   Future<void> _uploadToSupabase(
     Intervention intervention,
     PlatformFile file,
+    Uint8List processedBytes,
   ) async {
     try {
       final fileBytes = file.bytes!;
@@ -196,7 +203,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
           backgroundColor: AppColors.cardWhite,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.primaryBlue),
+            icon: const Icon(Icons.chevron_left, color: AppColors.primaryBlue),
             onPressed: () => Navigator.pop(context, hasChanges),
           ),
           title: const Text(

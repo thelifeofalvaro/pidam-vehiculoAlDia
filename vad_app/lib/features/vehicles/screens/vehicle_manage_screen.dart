@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:vad_app/core/utils/file_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
@@ -32,6 +34,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   ];
 
   String? _tipoSeleccionado;
+  String? _imageUrl;
   bool _guardando = false;
   bool _eliminando = false;
 
@@ -56,6 +59,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       _anioMatriculacionController.text = args.anioMatriculacion != null
           ? args.anioMatriculacion.toString()
           : '';
+      _imageUrl = args.imageUrl;
     }
   }
 
@@ -65,6 +69,8 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
     _matriculaController.dispose();
     _bastidorController.dispose();
     _kilometrajeController.dispose();
+    _anioMatriculacionController.dispose();
+    _imageUrl = null;
     super.dispose();
   }
 
@@ -92,6 +98,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       final modelo = partes.length > 1 ? partes.sublist(1).join(' ') : '';
       final km = int.tryParse(_kilometrajeController.text.trim());
       final aMatricula = int.tryParse(_anioMatriculacionController.text.trim());
+      final imageUrl = _imageUrl;
 
       if (_isEditing) {
         final updatedVehicle = Vehicle(
@@ -108,6 +115,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
               ? null
               : _bastidorController.text.trim(),
           kmVh: km,
+          imageUrl: imageUrl,
         );
 
         await _vehicleRepository.updateVehicle(updatedVehicle);
@@ -128,6 +136,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
               ? null
               : _bastidorController.text.trim(),
           kmVh: km,
+          imageUrl: imageUrl,
         );
 
         await _vehicleRepository.createVehicle(vehicle);
@@ -206,6 +215,101 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
     } finally {
       if (mounted) setState(() => _eliminando = false);
     }
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'png', 'jpeg'],
+      withData: true,
+    );
+
+    if (result == null) return;
+
+    final file = result.files.first;
+    final processedBytes = await FileUtils.processFile(
+      bytes: file.bytes!,
+      extension: file.extension ?? '',
+      context: context,
+    );
+
+    if (processedBytes == null) return;
+
+    final supabase = Supabase.instance.client;
+
+    final fileName =
+        'vehiculo_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+
+    final path = 'vehiculos/$fileName';
+
+    await supabase.storage
+        .from('archive')
+        .uploadBinary(
+          path,
+          processedBytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    final publicUrl = supabase.storage.from('archive').getPublicUrl(path);
+
+    setState(() {
+      _imageUrl = publicUrl;
+    });
+  }
+
+  Future<void> _deleteImage() async {
+    if (_imageUrl == null) return;
+
+    final supabase = Supabase.instance.client;
+
+    final uri = Uri.parse(_imageUrl!);
+    final path = uri.pathSegments.skip(2).join('/');
+
+    await supabase.storage.from('archive').remove([path]);
+
+    setState(() {
+      _imageUrl = null;
+    });
+  }
+
+  void _handleImageTap() {
+    if (!_isEditing) {
+      _pickAndUploadImage();
+    } else if (_imageUrl == null) {
+      _pickAndUploadImage();
+    } else {
+      _showImageOptions();
+    }
+  }
+
+  void _showImageOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Cambiar imagen'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickAndUploadImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Eliminar imagen'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteImage();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _limpiarFormulario() {
@@ -302,19 +406,26 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                       ),
                     ),
                     const SizedBox(height: 26),
-                    Container(
-                      width: double.infinity,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: AppColors.cloudWhite,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.image_outlined,
-                          size: 64,
-                          color: AppColors.carbonBlack,
+                    GestureDetector(
+                      onTap: _handleImageTap,
+                      child: Container(
+                        width: double.infinity,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: AppColors.cloudWhite,
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        child: _imageUrl != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  _imageUrl!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Center(
+                                child: Icon(Icons.image_outlined, size: 64),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 21),

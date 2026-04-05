@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vad_app/data/models/vehicle_model.dart';
 
 import '../../core/app_color.dart';
 import '../../core/app_text_styles.dart';
@@ -6,8 +7,9 @@ import '../../core/app_text_styles.dart';
 class AppBottomNavBar extends StatelessWidget {
   /// Índice del tab activo: 0=Inicio, 1=Historial, 2=Perfil
   final int currentIndex;
+  final Vehicle? vehicle;
 
-  const AppBottomNavBar({super.key, required this.currentIndex});
+  const AppBottomNavBar({super.key, required this.currentIndex, this.vehicle});
 
   @override
   Widget build(BuildContext context) {
@@ -58,18 +60,31 @@ class AppBottomNavBar extends StatelessWidget {
         Navigator.of(
           context,
         ).pushNamedAndRemoveUntil('/home', (route) => false);
+        break;
       case 1:
-        // Historial requiere un vehículo seleccionado primero
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Primero selecciona un vehículo para ver su historial',
+        // Si hay vehiculo seleccionado, vamos a su historial
+        if (vehicle != null) {
+          Navigator.pushNamed(
+            context,
+            '/intervention-list',
+            arguments: vehicle,
+          );
+          return;
+        } else {
+          // Si no estamos en ningun vehiculo, se muestra mensaje pidiendo seleccionar uno
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Primero selecciona un vehículo para ver su historial',
+              ),
+              duration: Duration(seconds: 2),
             ),
-            duration: Duration(seconds: 2),
-          ),
-        );
+          );
+        }
+        break;
       case 2:
         Navigator.pushNamed(context, '/profile');
+        break;
     }
   }
 }

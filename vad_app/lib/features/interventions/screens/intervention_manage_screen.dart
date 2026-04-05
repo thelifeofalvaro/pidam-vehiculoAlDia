@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/utils/file_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
@@ -181,15 +182,15 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
 
       final file = result.files.first;
 
-      if (file.size > 2 * 1024 * 1024) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('El archivo supera los 2MB')),
-        );
-        return;
-      }
-
       final fileBytes = file.bytes;
       if (fileBytes == null) throw Exception('Archivo inválido');
+
+      final processedBytes = await FileUtils.processFile(
+        bytes: fileBytes,
+        extension: file.extension ?? '',
+        context: context,
+      );
+      if (processedBytes == null) return;
 
       final fileName =
           '${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
@@ -202,7 +203,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           .from('interventions')
           .uploadBinary(
             path,
-            fileBytes,
+            processedBytes,
             fileOptions: const FileOptions(upsert: true),
           );
 
@@ -267,7 +268,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         backgroundColor: AppColors.cardWhite,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.primaryBlue),
+          icon: const Icon(Icons.chevron_left, color: AppColors.primaryBlue),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(

@@ -16,12 +16,7 @@ class Profile {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'nombre': nombre,
-      'email': email,
-      'avatar_url': avatarUrl,
-    };
+    return {'id': id, 'nombre': nombre, 'avatar_url': avatarUrl};
   }
 
   Profile copyWith({

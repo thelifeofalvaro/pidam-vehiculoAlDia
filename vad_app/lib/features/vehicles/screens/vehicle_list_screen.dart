@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-//TODO: VER PALETA COLORES
-
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
 
@@ -44,10 +42,6 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
   Future<void> goToCreate() async {
     final result = await Navigator.pushNamed(context, '/vehicle-manage');
 
-    if (result == true) {
-      loadVehicles();
-    }
-
     // Recarga al crear algo
     if (result == true) {
       loadVehicles();
@@ -87,6 +81,14 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
                       loadVehicles();
                     }
                   },
+                  leading: v.imageUrl != null
+                      ? Image.network(
+                          v.imageUrl!,
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        )
+                      : const Icon(Icons.directions_car),
                 );
               },
             ),

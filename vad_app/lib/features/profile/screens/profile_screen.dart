@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vad_app/core/utils/file_utils.dart';
 
 import '../../../core/app_color.dart';
 import '../../../core/app_text_styles.dart';
@@ -117,12 +118,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    await _loadProfile();
-
-    setState(() {
-      _isEditing = false;
-    });
-
     try {
       final updated = Profile(
         id: _profile!.id,
@@ -208,14 +203,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final file = result.files.first;
 
-      if (file.size > 2 * 1024 * 1024) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('La imagen supera los 2MB')),
-        );
-        return;
-      }
+      final processedBytes = await FileUtils.processFile(
+        bytes: file.bytes!,
+        extension: file.extension ?? '',
+        context: context,
+      );
 
-      final bytes = file.bytes!;
+      if (processedBytes == null) return;
       final supabase = Supabase.instance.client;
       final userId = supabase.auth.currentUser!.id;
 
@@ -226,7 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .from('usuarios')
           .uploadBinary(
             path,
-            bytes,
+            processedBytes,
             fileOptions: const FileOptions(upsert: true),
           );
 
@@ -493,7 +487,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: _isEditing
                                   ? null
                                   : IconButton(
-                                      onPressed: _enterEditMode,
+                                      onPressed: () {
+                                        _enterEditMode();
+                                        setState(() {
+                                          _isEditing = true;
+                                        });
+                                      },
                                       icon: const Icon(
                                         Icons.edit_outlined,
                                         size: 22,
@@ -564,59 +563,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 32),
 
                       // Boton para cerrar sesión
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton(
-                          onPressed: _isSaving || _isDeleting
-                              ? null
-                              : () async {
-                                  await _authService.signOut();
-
-                                  if (!mounted) return;
-
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
-                                    '/login',
-                                    (route) => false,
-                                  );
-                                  // Confirmación de cierre de sesión
-                                  final confirm = await showDialog<bool>(
-                                    context: context,
-                                    builder: (ctx) => AlertDialog(
-                                      title: const Text('Cerrar sesión'),
-                                      content: const Text(
-                                        '¿Quieres cerrar sesión?',
+                      if (!_isEditing)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: _isSaving || _isDeleting
+                                ? null
+                                : () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('Cerrar sesión'),
+                                        content: const Text(
+                                          '¿Estás seguro de que quieres cerrar sesión?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, false),
+                                            child: const Text('Cancelar'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, true),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  AppColors.errorRed,
+                                            ),
+                                            child: const Text('Cerrar sesión'),
+                                          ),
+                                        ],
                                       ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(ctx, false),
-                                          child: const Text('Cancelar'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(ctx, true),
-                                          child: const Text('Cerrar sesión'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
+                                    );
+                                    //Si el usuario cancela, no hacer nada
+                                    if (confirm != true) return;
+                                    //Si confirma, cerrar sesión
+                                    await _authService.signOut();
 
-                                  if (confirm != true) return;
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.errorRed.withValues(
-                              alpha: 0.85,
+                                    if (!mounted) return;
+
+                                    Navigator.of(
+                                      context,
+                                    ).pushNamedAndRemoveUntil(
+                                      '/login',
+                                      (route) => false,
+                                    );
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.errorRed.withValues(
+                                alpha: 0.85,
+                              ),
+                              foregroundColor: AppColors.cardWhite,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 0,
                             ),
-                            foregroundColor: AppColors.cardWhite,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
+                            child: const Text('Cerrar sesión'),
                           ),
-                          child: const Text('Cerrar sesión'),
                         ),
-                      ),
 
                       // Editar
                       if (_isEditing) ...[

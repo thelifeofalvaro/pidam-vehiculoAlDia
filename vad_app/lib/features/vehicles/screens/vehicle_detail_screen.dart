@@ -45,7 +45,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    /// 🔹 TOP BAR
+                    /// Top Bar
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                       child: Row(
@@ -55,7 +55,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             icon: const Icon(
                               Icons.chevron_left,
                               size: 28,
-                              color: AppColors.carbonBlack,
+                              color: AppColors.primaryBlue,
                             ),
                             onPressed: () => Navigator.pop(context, true),
                           ),
@@ -63,7 +63,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             icon: const Icon(
                               Icons.edit_square,
                               size: 24,
-                              color: AppColors.carbonBlack,
+                              color: AppColors.primaryBlue,
                             ),
                             onPressed: () async {
                               final result = await Navigator.pushNamed(
@@ -89,30 +89,24 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
                     /// Imagen
                     Container(
-                      width: double.infinity,
-                      height: 200,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.cloudWhite,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          'https://via.placeholder.com/400x200?text=Vehículo',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.cloudWhite,
-                            child: const Center(
-                              child: Icon(
-                                Icons.directions_car,
-                                size: 80,
-                                color: AppColors.secondarySteel,
+                      child: vehicle.imageUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image(
+                                image: NetworkImage(vehicle.imageUrl!),
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Container(
+                              color: AppColors.cloudWhite,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.directions_car,
+                                  size: 80,
+                                  color: AppColors.secondarySteel,
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
                     ),
 
                     const SizedBox(height: 21),
@@ -180,7 +174,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
                     const SizedBox(height: 21),
 
-                    /// 🔹 STAT CARDS (3 columnas: km, tipo, año)
+                    /// Datos (km, tipo, año) en fila de 3 tarjetas
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
@@ -221,7 +215,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
                     const SizedBox(height: 21),
 
-                    /// 🔹 BOTÓN HISTORIAL (orange)
+                    /// BOTÓN HISTORIAL
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: SizedBox(
@@ -270,8 +264,11 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               ),
             ),
 
-            /// 🔹 BOTTOM TAB BAR
-            AppBottomNavBar(currentIndex: 0),
+            /// BOTTOM TAB BAR
+            AppBottomNavBar(
+              currentIndex: -1, //Ninguno seleccionado, detalle para mejorar UI
+              vehicle: vehicle,
+            ),
           ],
         ),
       ),
