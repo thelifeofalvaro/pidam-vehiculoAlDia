@@ -117,3 +117,9 @@ create policy "Usuario puede ver su perfil"
 on public.usuarios
 for select
 using (auth.uid() = id);
+
+-- Usuario se crea en la BBDD
+create policy "Usuario puede insertarse"
+on public.usuarios
+for insert
+with check (auth.uid() = id);
