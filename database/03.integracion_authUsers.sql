@@ -7,11 +7,10 @@ ADD COLUMN auth_id UUID UNIQUE;
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.usuarios (id, email, nombre)
+  insert into public.usuarios (id, nombre)
   values (
     new.id,
-    new.email,
-    new.raw_user_meta_data->>'display_name'
+    coalesce(new.raw_user_meta_data->>'display_name', 'Usuario')
   );
   return new;
 end;
