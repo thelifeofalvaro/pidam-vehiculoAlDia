@@ -50,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  // Cargar Perfil
   Future<void> _loadProfile() async {
     try {
       final data = await _repo.getProfile();
@@ -71,6 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // Editar perfil
   void _enterEditMode() {
     _passwordController.clear();
     _confirmPasswordController.clear();
@@ -78,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _cancelEdit() {
-    // Restaura valores originales
     if (_profile != null) {
       _nameController.text = _profile!.nombre ?? '';
       _emailController.text = _profile!.email ?? '';
@@ -88,6 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isEditing = false);
   }
 
+  // Guardar Perfil
   Future<void> _saveProfile() async {
     if (_profile == null) return;
 
@@ -117,6 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
       return;
     }
+
+    setState(() => _isSaving = true);
 
     try {
       final updated = Profile(
@@ -151,6 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // Eliminar Cuenta
   Future<void> _deleteProfile() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -191,6 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // Subir foto perfil
   Future<void> _pickAndUploadProfileImage() async {
     try {
       final result = await FilePicker.platform.pickFiles(
@@ -210,26 +216,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
 
       if (processedBytes == null) return;
+
       final supabase = Supabase.instance.client;
       final userId = supabase.auth.currentUser!.id;
-
       final fileName = 'profile_$userId.${file.extension}';
       final path = 'profiles/$fileName';
 
       await supabase.storage
-          .from('usuarios')
+          .from(FileUtils.bucket)
           .uploadBinary(
             path,
             processedBytes,
             fileOptions: const FileOptions(upsert: true),
           );
 
-      final publicUrl = supabase.storage.from('usuarios').getPublicUrl(path);
+      final publicUrl = supabase.storage
+          .from(FileUtils.bucket)
+          .getPublicUrl(path);
 
       await supabase
           .from('usuarios')
           .update({'avatar_url': publicUrl})
           .eq('id', userId);
+
+      if (!mounted) return;
 
       setState(() {
         _profile = _profile?.copyWith(avatarUrl: publicUrl);
@@ -239,29 +249,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Foto actualizada')));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error subiendo imagen: $e')));
     }
   }
 
+  //  Eliminar foto de perfil ─
   Future<void> _deleteProfileImage() async {
     try {
       if (_profile?.avatarUrl == null) return;
 
       final supabase = Supabase.instance.client;
-
       final uri = Uri.parse(_profile!.avatarUrl!);
       final filePath = uri.pathSegments.skip(2).join('/');
 
-      await supabase.storage.from('usuarios').remove([filePath]);
+      await supabase.storage.from(FileUtils.bucket).remove([filePath]);
 
       final userId = supabase.auth.currentUser!.id;
-
       await supabase
           .from('usuarios')
           .update({'avatar_url': null})
           .eq('id', userId);
+
+      if (!mounted) return;
 
       setState(() {
         _profile = _profile?.copyWith(avatarUrl: null);
@@ -271,12 +283,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Foto eliminada')));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error eliminando imagen: $e')));
     }
   }
 
+  //  Tap en avatar ─
   void _onAvatarTap() {
     if (_profile?.avatarUrl != null && _profile!.avatarUrl!.isNotEmpty) {
       showModalBottomSheet(
@@ -310,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // UI
+  //  Input decoration
   InputDecoration _inputDecoration({Widget? suffixIcon}) {
     return InputDecoration(
       suffixIcon: suffixIcon,
@@ -336,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Campo editable
+  //  Campo editable
   Widget _formField({
     required String label,
     required TextEditingController controller,
@@ -367,7 +381,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Campo solo lectura
+  //  Campo solo lectura
   Widget _readOnlyField({required String label, required String value}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  //  Campo contraseña (lectura), caracteres ocultos
+  //  Campo contraseña solo lectura ─
   Widget _readOnlyPasswordField({required String label}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,6 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  //  Build ─
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -447,11 +462,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Top Bar
                       SizedBox(
                         height: 44,
                         child: Row(
                           children: [
-                            // Izquierda: flecha atrás (ver) o X cancelar (editar)
                             SizedBox(
                               width: 40,
                               child: IconButton(
@@ -468,8 +483,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 padding: EdgeInsets.zero,
                               ),
                             ),
-
-                            // Centro: título
                             Expanded(
                               child: Center(
                                 child: Text(
@@ -480,19 +493,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                             ),
-
-                            // Derecha: lápiz editar (ver) o vacío (editar)
                             SizedBox(
                               width: 40,
                               child: _isEditing
                                   ? null
                                   : IconButton(
-                                      onPressed: () {
-                                        _enterEditMode();
-                                        setState(() {
-                                          _isEditing = true;
-                                        });
-                                      },
+                                      onPressed: _enterEditMode,
                                       icon: const Icon(
                                         Icons.edit_outlined,
                                         size: 22,
@@ -507,7 +513,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Avatar circular con icono persona
+                      // Avatar
                       Center(
                         child: GestureDetector(
                           onTap: _onAvatarTap,
@@ -545,7 +551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       const SizedBox(height: 32),
 
-                      // VER
+                      // Ver perfil (solo lectura)
                       if (!_isEditing) ...[
                         _readOnlyField(
                           label: 'Nombre Usuario',
@@ -558,17 +564,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 16),
                         _readOnlyPasswordField(label: 'Contraseña'),
-                      ],
+                        const SizedBox(height: 32),
 
-                      const SizedBox(height: 32),
-
-                      // Boton para cerrar sesión
-                      if (!_isEditing)
+                        // Botón cerrar sesión
                         SizedBox(
                           width: double.infinity,
                           height: 52,
                           child: ElevatedButton(
-                            onPressed: _isSaving || _isDeleting
+                            onPressed: (_isSaving || _isDeleting)
                                 ? null
                                 : () async {
                                     final confirm = await showDialog<bool>(
@@ -596,13 +599,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ],
                                       ),
                                     );
-                                    //Si el usuario cancela, no hacer nada
                                     if (confirm != true) return;
-                                    //Si confirma, cerrar sesión
                                     await _authService.signOut();
-
                                     if (!mounted) return;
-
                                     Navigator.of(
                                       context,
                                     ).pushNamedAndRemoveUntil(
@@ -620,11 +619,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               elevation: 0,
                             ),
-                            child: const Text('Cerrar sesión'),
+                            child: Text(
+                              'Cerrar sesión',
+                              style: AppTextStyles.button.copyWith(
+                                color: AppColors.cardWhite,
+                              ),
+                            ),
                           ),
                         ),
+                      ],
 
-                      // Editar
+                      //  MODO EDITAR
                       if (_isEditing) ...[
                         _formField(
                           label: 'Nombre',
@@ -632,8 +637,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           keyboardType: TextInputType.name,
                         ),
                         const SizedBox(height: 16),
-
-                        // Email visible pero bloqueado
                         _formField(
                           label: 'Email',
                           controller: _emailController,
@@ -641,7 +644,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           enabled: false,
                         ),
                         const SizedBox(height: 16),
-
                         _formField(
                           label: 'Contraseña',
                           controller: _passwordController,
@@ -660,7 +662,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-
                         _formField(
                           label: 'Confirmar Contraseña',
                           controller: _confirmPasswordController,
@@ -680,7 +681,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 32),
 
-                        // Boton Guardar Cambios
+                        // Botón Guardar Cambios
                         SizedBox(
                           width: double.infinity,
                           height: 52,
@@ -716,7 +717,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                         const SizedBox(height: 12),
 
-                        // Boton Eliminar Perfil
+                        // Botón Eliminar Perfil
                         SizedBox(
                           width: double.infinity,
                           height: 52,

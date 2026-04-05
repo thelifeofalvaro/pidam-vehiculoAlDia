@@ -145,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       FilteringTextInputFormatter.deny(RegExp(r'\s')),
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Nombre:',
+                      hintText: 'Nombre: de usuario (sin espacios)',
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
@@ -181,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: 'E-mail:',
+                      hintText: 'E-mail',
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
@@ -217,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      hintText: 'Contraseña:',
+                      hintText: 'Contraseña',
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
@@ -253,7 +253,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: confirmPasswordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      hintText: 'Confirmar contraseña:',
+                      hintText: 'Confirmar contraseña',
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,

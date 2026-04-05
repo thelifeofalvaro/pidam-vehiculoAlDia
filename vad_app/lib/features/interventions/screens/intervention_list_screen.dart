@@ -128,7 +128,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       final supabase = Supabase.instance.client;
 
       await supabase.storage
-          .from('interventions')
+          .from('archive')
           .uploadBinary(
             path,
             fileBytes,
@@ -654,9 +654,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       final uri = Uri.parse(intervention.urlAdjunto!);
                       final filePath = uri.pathSegments.skip(2).join('/');
 
-                      await supabase.storage.from('interventions').remove([
-                        filePath,
-                      ]);
+                      await supabase.storage.from('archive').remove([filePath]);
 
                       await _repository.updateIntervention(
                         intervention.copyWith(urlAdjunto: null),

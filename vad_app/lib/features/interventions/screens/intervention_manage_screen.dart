@@ -200,7 +200,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       final supabase = Supabase.instance.client;
 
       await supabase.storage
-          .from('interventions')
+          .from('archive')
           .uploadBinary(
             path,
             processedBytes,
@@ -235,7 +235,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       final uri = Uri.parse(documentoAdjunto!);
       final filePath = uri.pathSegments.skip(2).join('/');
 
-      await supabase.storage.from('interventions').remove([filePath]);
+      await supabase.storage.from('archive').remove([filePath]);
 
       setState(() {
         documentoAdjunto = null;

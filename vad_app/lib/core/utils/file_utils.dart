@@ -1,5 +1,3 @@
-// lib/core/utils/file_utils.dart
-
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -7,6 +5,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 class FileUtils {
   static const int maxSizeBytes = 2 * 1024 * 1024; // 2MB
   static const int targetSizeBytes = 1 * 1024 * 1024; // 1MB tras comprimir
+  static const String bucket = 'archive';
 
   /// Valida el archivo y comprime si es imagen grande.
   /// Devuelve los bytes procesados o null si hay error/rechazo.

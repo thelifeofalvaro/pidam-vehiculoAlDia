@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: 'E-mail:',
+                      hintText: 'E-mail',
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      hintText: 'Password:',
+                      hintText: 'Constraseña',
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
