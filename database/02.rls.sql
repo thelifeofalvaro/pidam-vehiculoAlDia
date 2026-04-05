@@ -23,7 +23,8 @@ WITH CHECK (auth.uid() = id);
 CREATE POLICY "Usuario actualiza su perfil"
 ON usuarios
 FOR UPDATE
-USING (auth.uid() = id);
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
 
 -- =========================
 -- VEHICULOS
