@@ -87,3 +87,7 @@ add column lugar lugar_enum;
 -- Añadir campo nuevo a la tabla usuarios
 alter table usuarios
 add column avatar_url text
+
+-- Añadir campo para fotos a la tabla Vehiculos
+alter table vehiculos
+add column image_url text;
