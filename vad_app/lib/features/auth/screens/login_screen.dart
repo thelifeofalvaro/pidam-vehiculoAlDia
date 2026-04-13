@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
 
   bool isLoading = false;
+  bool _obscurePassword = true;
 
   /// FUNCIÓN LOGIN
   Future<void> login() async {
@@ -128,15 +129,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
                   TextField(
                     controller: passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       hintText: 'Constraseña',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: AppColors.textSteel,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
                         height: 18 / 13,
-                        color: AppColors.textSteel,
+                        color: AppColors.secondarySteel,
                       ),
                       filled: true,
                       fillColor: AppColors.cloudWhite,

@@ -131,12 +131,12 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
           .from('archive')
           .uploadBinary(
             path,
-            fileBytes,
+            processedBytes,
             fileOptions: const FileOptions(upsert: true),
           );
 
       final publicUrl = supabase.storage
-          .from('interventions')
+          .from(FileUtils.bucket)
           .getPublicUrl(path);
 
       /// Guardar URL en la intervención
@@ -654,7 +654,9 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       final uri = Uri.parse(intervention.urlAdjunto!);
                       final filePath = uri.pathSegments.skip(2).join('/');
 
-                      await supabase.storage.from('archive').remove([filePath]);
+                      await supabase.storage.from(FileUtils.bucket).remove([
+                        filePath,
+                      ]);
 
                       await _repository.updateIntervention(
                         intervention.copyWith(urlAdjunto: null),

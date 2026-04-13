@@ -24,6 +24,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
 
   bool isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   /// FUNCIÓN REGISTRO
   Future<void> register() async {
@@ -215,9 +217,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 24),
                   TextField(
                     controller: passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       hintText: 'Contraseña',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: AppColors.secondarySteel,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,
@@ -251,9 +266,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: confirmPasswordController,
-                    obscureText: true,
+                    obscureText: _obscureConfirm,
                     decoration: InputDecoration(
                       hintText: 'Confirmar contraseña',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirm
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: AppColors.secondarySteel,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirm = !_obscureConfirm;
+                          });
+                        },
+                      ),
                       hintStyle: const TextStyle(
                         fontFamily: 'Roboto',
                         fontSize: 13,

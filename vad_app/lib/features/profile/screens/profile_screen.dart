@@ -256,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  //  Eliminar foto de perfil ─
+  //  Eliminar foto de perfil
   Future<void> _deleteProfileImage() async {
     try {
       if (_profile?.avatarUrl == null) return;
@@ -290,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  //  Tap en avatar ─
+  //  Tap en avatar
   void _onAvatarTap() {
     if (_profile?.avatarUrl != null && _profile!.avatarUrl!.isNotEmpty) {
       showModalBottomSheet(

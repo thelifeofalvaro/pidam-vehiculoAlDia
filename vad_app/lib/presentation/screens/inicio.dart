@@ -107,8 +107,8 @@ class _HomeEmptyState extends StatelessWidget {
               child: Column(
                 children: [
                   SizedBox(
-                    width: 90,
-                    height: 90,
+                    width: 80,
+                    height: 80,
                     child: Image.asset(
                       'assets/images/vacio_vehiculos.png',
                       fit: BoxFit.contain,
@@ -249,10 +249,22 @@ class _HomeWithData extends StatelessWidget {
                             SizedBox(
                               width: 80,
                               height: 80,
-                              child: Image.asset(
-                                'assets/images/vacio_vehiculos.png',
-                                fit: BoxFit.contain,
-                              ),
+                              child: v.imageUrl != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        v.imageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Image.asset(
+                                          'assets/images/vacio_vehiculos.png',
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      'assets/images/vacio_vehiculos.png',
+                                      fit: BoxFit.contain,
+                                    ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(

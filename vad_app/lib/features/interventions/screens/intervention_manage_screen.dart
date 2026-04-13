@@ -208,7 +208,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           );
 
       final publicUrl = supabase.storage
-          .from('interventions')
+          .from(FileUtils.bucket)
           .getPublicUrl(path);
 
       setState(() {
