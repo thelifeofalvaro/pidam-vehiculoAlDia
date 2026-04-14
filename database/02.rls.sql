@@ -84,9 +84,9 @@ WITH CHECK (
 );
 
 -- Actualizar intervenciones
-CREATE POLICY "Insertar intervenciones propias"
+CREATE POLICY "Actualizar intervenciones propias"
 ON intervenciones
-FOR INSERT
+FOR UPDATE
 WITH CHECK (
   EXISTS (
     SELECT 1 FROM vehiculos v
