@@ -12,7 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 .env
-.run_dev.bat
+dart_defines.json
+run_dev.bat
+build_apk.bat
 
 # IntelliJ related
 *.iml
