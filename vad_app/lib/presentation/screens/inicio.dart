@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vad_app/data/models/vehicle_model.dart';
 import 'package:vad_app/data/repositories/vehicle_repository.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -90,16 +91,7 @@ class _HomeEmptyState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 24),
-          const Text(
-            'Vehículo Al Día',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              height: 24 / 18,
-              color: AppColors.primaryBlue,
-            ),
-          ),
+          const Text('Vehículo Al Día', style: AppTextStyles.heading2),
           const Spacer(),
           Center(
             child: ConstrainedBox(
@@ -115,14 +107,10 @@ class _HomeEmptyState extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Aún no tienes vehículos registrados',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      height: 24 / 18,
+                    style: AppTextStyles.heading2.copyWith(
                       color: AppColors.carbonBlack,
                     ),
                   ),
@@ -130,13 +118,7 @@ class _HomeEmptyState extends StatelessWidget {
                   const Text(
                     'Añade tu primer vehículo',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                      height: 22 / 15,
-                      color: AppColors.textSteel,
-                    ),
+                    style: AppTextStyles.bodyMedium,
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
@@ -154,12 +136,7 @@ class _HomeEmptyState extends StatelessWidget {
                       ),
                       child: const Text(
                         'Añadir Vehículo',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          height: 22 / 16,
-                        ),
+                        style: AppTextStyles.button,
                       ),
                     ),
                   ),
@@ -167,10 +144,10 @@ class _HomeEmptyState extends StatelessWidget {
               ),
             ),
           ),
-          const Spacer(),
         ],
       ),
     );
+    const Spacer();
   }
 }
 
@@ -196,26 +173,11 @@ class _HomeWithData extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              const Text(
-                'Vehículo Al Día',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  height: 24 / 18,
-                  color: AppColors.primaryBlue,
-                ),
-              ),
+              const Text('Vehículo Al Día', style: AppTextStyles.heading2),
               const SizedBox(height: 28),
               Text(
                 '${vehicles.length} Vehículos registrados',
-                style: const TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  height: 28 / 22,
-                  color: AppColors.primaryBlue,
-                ),
+                style: AppTextStyles.heading1,
               ),
               const SizedBox(height: 17),
               Expanded(
@@ -276,11 +238,7 @@ class _HomeWithData extends StatelessWidget {
                                     '${v.marca ?? ''} ${v.modelo ?? ''}'.trim(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      height: 24 / 18,
+                                    style: AppTextStyles.heading2.copyWith(
                                       color: AppColors.carbonBlack,
                                     ),
                                   ),
@@ -288,23 +246,13 @@ class _HomeWithData extends StatelessWidget {
                                     v.matricula ?? 'Matrícula',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Roboto',
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w400,
-                                      height: 18 / 13,
-                                      color: AppColors.textSteel,
-                                    ),
+                                    style: AppTextStyles.bodySmall,
                                   ),
                                   Text(
                                     '${v.kmVh ?? 0} Km',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      height: 22 / 16,
+                                    style: AppTextStyles.bodyLarge.copyWith(
                                       color: AppColors.textSteel,
                                     ),
                                   ),

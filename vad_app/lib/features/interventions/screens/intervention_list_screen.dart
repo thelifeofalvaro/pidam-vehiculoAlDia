@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
@@ -104,8 +105,6 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       if (processedBytes == null) return;
 
       await _uploadToSupabase(intervention, file, processedBytes);
-
-      await _uploadToSupabase(intervention, file, processedBytes);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error seleccionando archivo: $e')),
@@ -119,7 +118,6 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
     Uint8List processedBytes,
   ) async {
     try {
-      final fileBytes = file.bytes!;
       final fileName =
           '${intervention.id}_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
 
@@ -208,12 +206,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
           ),
           title: const Text(
             'Historial Vehículo',
-            style: TextStyle(
-              color: AppColors.primaryBlue,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Inter',
-            ),
+            style: AppTextStyles.heading2,
           ),
         ),
         floatingActionButton: interventions.isNotEmpty
@@ -245,7 +238,6 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
             Center(
               child: Column(
                 children: [
-                  // Icon placeholder (clipboard icon)
                   Container(
                     width: 90,
                     height: 90,
@@ -261,25 +253,17 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  const Text(
+                  Text(
                     'Aún no tienes intervenciones registradas',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                    style: AppTextStyles.heading2.copyWith(
                       color: AppColors.carbonBlack,
-                      fontFamily: 'Inter',
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 22),
                   const Text(
                     'Añade tu primera intervención',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSteel,
-                      fontFamily: 'Inter',
-                    ),
+                    style: AppTextStyles.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 22),
@@ -297,12 +281,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       ),
                       child: const Text(
                         'Añadir Intervención',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.carbonBlack,
-                          fontFamily: 'Inter',
-                        ),
+                        style: AppTextStyles.button,
                       ),
                     ),
                   ),
@@ -325,7 +304,6 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Filter buttons row
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -350,7 +328,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Vehicle info card
+              // Tarjeta de info del vehículo + Gasto
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
@@ -365,11 +343,8 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       children: [
                         Text(
                           '${widget.vehicle.marca} ${widget.vehicle.modelo}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
+                          style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.carbonBlack,
-                            fontFamily: 'Inter',
                           ),
                         ),
                         const SizedBox(width: 9),
@@ -388,11 +363,8 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                           ),
                           child: Text(
                             widget.vehicle.matricula ?? 'N/A',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
+                            style: AppTextStyles.caption.copyWith(
                               color: AppColors.carbonBlack,
-                              fontFamily: 'Roboto',
                             ),
                           ),
                         ),
@@ -402,22 +374,15 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     RichText(
                       text: TextSpan(
                         children: [
-                          const TextSpan(
+                          TextSpan(
                             text: 'Gasto total en este vehículo: ',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: AppColors.textSteel,
-                              fontFamily: 'Inter',
-                            ),
+                            style: AppTextStyles.bodyMedium,
                           ),
                           TextSpan(
                             text: formatCost(getTotalCost()),
-                            style: const TextStyle(
-                              fontSize: 15,
+                            style: AppTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.bold,
                               color: AppColors.carbonBlack,
-                              fontFamily: 'Inter',
                             ),
                           ),
                         ],
@@ -429,7 +394,8 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
             ],
           ),
         ),
-        // Timeline of interventions
+
+        // Timeline intervenciones
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -495,12 +461,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       Expanded(
                         child: Text(
                           intervention.tipoIntervencion ?? 'Sin tipo',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.carbonBlack,
-                            fontFamily: 'Inter',
-                          ),
+                          style: AppTextStyles.heading3,
                         ),
                       ),
 
@@ -525,12 +486,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                         intervention.descripcion!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textSteel,
-                          fontFamily: 'Roboto',
-                        ),
+                        style: AppTextStyles.bodySmall,
                       ),
                     ),
                   const SizedBox(height: 4),
@@ -539,21 +495,11 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                     children: [
                       Text(
                         '${formatDate(intervention.fechaIntervencion)} • ${intervention.kmIntervencion ?? 0} km',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textSteel,
-                          fontFamily: 'Roboto',
-                        ),
+                        style: AppTextStyles.bodySmall,
                       ),
                       Text(
                         formatCost(intervention.coste),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.carbonBlack,
-                          fontFamily: 'Inter',
-                        ),
+                        style: AppTextStyles.heading3,
                       ),
                     ],
                   ),
@@ -585,11 +531,8 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
+          style: AppTextStyles.bodySmall.copyWith(
             color: isSelected ? AppColors.cardWhite : AppColors.primaryBlue,
-            fontFamily: 'Roboto',
           ),
         ),
       ),

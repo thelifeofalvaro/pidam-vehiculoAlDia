@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 
 import '../../../data/services/auth_service.dart';
 
@@ -20,6 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+
+  static final RegExp _emailRegex = RegExp(r'^[^\s@]+@[^\s@]+.[^\s@]+$');
 
   final AuthService _authService = AuthService();
 
@@ -46,6 +49,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
+    if (!_emailRegex.hasMatch(emailController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Introduce un correo electrónico válido')),
+      );
+      return;
+    }
+
     if (passwordController.text.trim() !=
         confirmPasswordController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       // Volver al login tras registrarse
-      Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -75,6 +84,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       );
+
+      Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -118,43 +129,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Crea tu cuenta',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      height: 28 / 22,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
+                  Text('Crea tu cuenta', style: AppTextStyles.heading1),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Únete para gestionar tus vehículos',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w400,
-                      height: 22 / 15,
+                    style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.secondarySteel,
                     ),
                   ),
                   const SizedBox(height: 24),
                   TextField(
                     controller: nameController,
-                    textCapitalization: TextCapitalization.words,
                     inputFormatters: [
                       FilteringTextInputFormatter.deny(RegExp(r'\s')),
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Nombre: de usuario (sin espacios)',
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 18 / 13,
-                        color: AppColors.textSteel,
-                      ),
+                      hintText: 'Nombre de usuario (sin espacios)',
+                      hintStyle: AppTextStyles.bodySmall,
                       filled: true,
                       fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
@@ -184,13 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'E-mail',
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 18 / 13,
-                        color: AppColors.textSteel,
-                      ),
+                      hintStyle: AppTextStyles.bodySmall,
                       filled: true,
                       fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
@@ -233,13 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           });
                         },
                       ),
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 18 / 13,
-                        color: AppColors.textSteel,
-                      ),
+                      hintStyle: AppTextStyles.bodySmall,
                       filled: true,
                       fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
@@ -282,13 +261,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           });
                         },
                       ),
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 18 / 13,
-                        color: AppColors.textSteel,
-                      ),
+                      hintStyle: AppTextStyles.bodySmall,
                       filled: true,
                       fillColor: AppColors.cloudWhite,
                       border: OutlineInputBorder(
@@ -341,51 +314,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             )
                           : const Text(
                               'Registrarse',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                height: 20 / 16,
-                              ),
+                              style: AppTextStyles.button,
                             ),
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 4,
                     children: [
-                      const Expanded(
-                        child: Text(
-                          '¿Ya tienes cuenta?',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            height: 22 / 15,
-                            color: AppColors.textSteel,
-                          ),
-                        ),
+                      const Text(
+                        '¿Ya tienes cuenta?',
+                        style: AppTextStyles.bodyMedium,
                       ),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primaryBlue,
-                          padding: const EdgeInsets.only(left: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
+                        child: Text(
                           'Inicia sesión',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            height: 22 / 15,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.primaryBlue,
                           ),
                         ),
                       ),
-                      const Spacer(),
                     ],
                   ),
                 ],

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
@@ -273,12 +274,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         ),
         title: Text(
           isEditing ? 'Editar Intervención' : 'Nueva Intervención',
-          style: const TextStyle(
-            color: AppColors.primaryBlue,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
-          ),
+          style: AppTextStyles.heading2,
         ),
       ),
       body: SingleChildScrollView(
@@ -354,12 +350,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                   ),
                   child: const Text(
                     'Guardar Intervención',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.carbonBlack,
-                      fontFamily: 'Inter',
-                    ),
+                    style: AppTextStyles.button,
                   ),
                 ),
               ),
@@ -379,13 +370,10 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Eliminar Intervención',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                      style: AppTextStyles.button.copyWith(
                         color: AppColors.cardWhite,
-                        fontFamily: 'Inter',
                       ),
                     ),
                   ),
@@ -414,12 +402,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: label,
-          labelStyle: const TextStyle(
-            color: AppColors.carbonBlack,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Inter',
-          ),
+          labelStyle: AppTextStyles.heading3,
         ),
         items: items
             .map(
@@ -449,12 +432,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: label,
-          labelStyle: const TextStyle(
-            color: AppColors.carbonBlack,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Inter',
-          ),
+          labelStyle: AppTextStyles.heading3,
         ),
       ),
     );
@@ -481,12 +459,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
               fechaSeleccionada != null
                   ? DateFormat('dd/MM/yyyy').format(fechaSeleccionada!)
                   : 'Fecha',
-              style: const TextStyle(
-                color: AppColors.carbonBlack,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Inter',
-              ),
+              style: AppTextStyles.heading3,
             ),
           ],
         ),
@@ -522,11 +495,8 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
             const SizedBox(width: 8),
             Text(
               hasFile ? 'Eliminar documento' : 'Adjuntar documento',
-              style: TextStyle(
+              style: AppTextStyles.bodySmall.copyWith(
                 color: hasFile ? AppColors.errorRed : AppColors.carbonBlack,
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                fontFamily: 'Roboto',
               ),
             ),
           ],
@@ -545,14 +515,11 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       child: TextField(
         controller: notasController,
         maxLines: 5,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           border: InputBorder.none,
-          hintText: 'Notas...',
-          hintStyle: TextStyle(
+          hintText: 'Añade aquí tus notas',
+          hintStyle: AppTextStyles.bodySmall.copyWith(
             color: AppColors.carbonBlack,
-            fontSize: 13,
-            fontWeight: FontWeight.w400,
-            fontFamily: 'Roboto',
           ),
         ),
       ),

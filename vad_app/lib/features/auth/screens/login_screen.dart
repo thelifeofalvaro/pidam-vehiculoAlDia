@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:vad_app/core/app_color.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 
 import '../../../data/services/auth_service.dart';
 
@@ -43,10 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           isLoading = false;
         });
+      }
     }
   }
 
@@ -79,16 +81,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'Vehículo Al Día - Login',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      height: 28 / 22,
-                      color: AppColors.primaryBlue,
-                    ),
+                    style: AppTextStyles.heading1,
                   ),
                   const SizedBox(height: 24),
                   TextField(
@@ -96,11 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'E-mail',
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 18 / 13,
+                      hintStyle: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textSteel,
                       ),
                       filled: true,
@@ -146,12 +138,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           });
                         },
                       ),
-                      hintStyle: const TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 18 / 13,
-                        color: AppColors.secondarySteel,
+                      hintStyle: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSteel,
                       ),
                       filled: true,
                       fillColor: AppColors.cloudWhite,
@@ -203,13 +191,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             )
-                          : const Text(
+                          : Text(
                               'Entrar',
-                              style: TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                height: 20 / 16,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: AppColors.carbonBlack,
                               ),
                             ),
                     ),
@@ -218,13 +203,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         '¿No tienes cuenta?',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w400,
-                          height: 22 / 15,
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.textSteel,
                         ),
                       ),
@@ -238,13 +219,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text(
+                        child: Text(
                           'Registrate',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            height: 22 / 15,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.primaryBlue,
                           ),
                         ),
                       ),

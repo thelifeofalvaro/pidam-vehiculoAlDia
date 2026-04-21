@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
@@ -125,18 +126,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             /// Marca/Modelo (bold)
-                            Text(
-                              marcaModelo,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Inter',
-                                color: AppColors.carbonBlack,
-                              ),
-                            ),
+                            Text(marcaModelo, style: AppTextStyles.heading3),
                             const SizedBox(height: 8),
 
-                            /// Matrícula (tagged style)
+                            /// Matrícula (Formato para destacar)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -148,11 +141,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               ),
                               child: Text(
                                 vehicle.matricula ?? 'N/A',
-                                style: const TextStyle(
-                                  fontSize: 12,
+                                style: AppTextStyles.caption.copyWith(
                                   fontWeight: FontWeight.w500,
-                                  fontFamily: 'Roboto',
-                                  color: AppColors.primaryBlue,
+                                  color: AppColors.carbonBlack,
                                 ),
                               ),
                             ),
@@ -161,11 +152,7 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                             /// Bastidor/VIN
                             Text(
                               'Bastidor/VIN: ${vehicle.bastidor ?? 'N/A'}',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'Roboto',
-                                color: AppColors.secondarySteel,
-                              ),
+                              style: AppTextStyles.caption,
                             ),
                           ],
                         ),
@@ -245,13 +232,10 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               });
                             }
                           },
-                          child: const Text(
+                          child: Text(
                             'Historial',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Inter',
-                              color: Colors.white,
+                            style: AppTextStyles.button.copyWith(
+                              color: AppColors.cardWhite,
                             ),
                           ),
                         ),

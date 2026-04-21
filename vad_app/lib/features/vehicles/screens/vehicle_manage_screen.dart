@@ -4,6 +4,7 @@ import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
+import 'package:vad_app/core/app_text_styles.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
@@ -327,13 +328,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: const TextStyle(
-        fontFamily: 'Roboto',
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
-        height: 18 / 13,
-        color: AppColors.carbonBlack,
-      ),
+      hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.carbonBlack),
       filled: true,
       fillColor: AppColors.cloudWhite,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
@@ -391,13 +386,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                                 _isEditing
                                     ? 'Editar Vehículo'
                                     : 'Añadir Vehículo',
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  height: 22 / 18,
-                                  color: AppColors.primaryBlue,
-                                ),
+                                style: AppTextStyles.heading2,
                               ),
                             ),
                           ),
@@ -429,26 +418,13 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                       ),
                     ),
                     const SizedBox(height: 21),
-                    const Text(
-                      'Marca y Modelo',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        height: 22 / 16,
-                        color: Colors.black,
-                      ),
-                    ),
+                    const Text('Marca y Modelo', style: AppTextStyles.heading3),
                     const SizedBox(height: 1),
                     SizedBox(
                       height: 48,
                       child: TextField(
                         controller: _marcaModeloController,
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          height: 18 / 13,
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(),
@@ -463,11 +439,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                           Icons.keyboard_arrow_down,
                           color: AppColors.actionOrange,
                         ),
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          height: 18 / 13,
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(
@@ -494,11 +466,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                       height: 48,
                       child: TextField(
                         controller: _matriculaController,
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          height: 18 / 13,
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(hintText: 'Matricula'),
@@ -509,14 +477,32 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                       height: 48,
                       child: TextField(
                         controller: _bastidorController,
-                        style: const TextStyle(
-                          fontFamily: 'Roboto',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w400,
-                          height: 18 / 13,
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.carbonBlack,
                         ),
                         decoration: _inputDecoration(hintText: 'Bastidor'),
+                      ),
+                    ),
+                    const SizedBox(height: 21),
+                    SizedBox(
+                      height: 48,
+                      child: TextField(
+                        controller: _bastidorController,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.carbonBlack,
+                        ),
+                        decoration: _inputDecoration(hintText: 'Bastidor'),
+                      ),
+                    ),
+                    const SizedBox(height: 21),
+                    SizedBox(
+                      height: 48,
+                      child: TextField(
+                        controller: _kilometrajeController,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.carbonBlack,
+                        ),
+                        decoration: _inputDecoration(hintText: 'Kilometraje'),
                       ),
                     ),
                     const SizedBox(height: 21),
@@ -581,12 +567,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                                 _isEditing
                                     ? 'Guardar cambios'
                                     : 'Guardar Vehículo',
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  height: 20 / 16,
-                                ),
+                                style: AppTextStyles.button,
                               ),
                       ),
                     ),
@@ -617,13 +598,10 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text(
+                            : Text(
                                 'Eliminar Vehículo',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  height: 20 / 16,
+                                style: AppTextStyles.button.copyWith(
+                                  color: Colors.white,
                                 ),
                               ),
                       ),

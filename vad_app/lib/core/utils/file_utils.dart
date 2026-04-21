@@ -92,14 +92,14 @@ class FileUtils {
         ? CompressFormat.png
         : CompressFormat.jpeg;
 
-    // Intentamos con calidad 80 primero
+    // Intentamos con calidad 80% primero
     var result = await FlutterImageCompress.compressWithList(
       bytes,
       quality: 80,
       format: format,
     );
 
-    // Si sigue grande, bajamos a calidad 60
+    // Si sigue grande, bajamos a calidad 60%
     if (result.length > maxSizeBytes) {
       result = await FlutterImageCompress.compressWithList(
         bytes,
@@ -111,3 +111,5 @@ class FileUtils {
     return result;
   }
 }
+
+// Unitarias e integración + Caja blanca y negra
