@@ -23,12 +23,6 @@ void main() async {
     anonKey: AppConfig.supabaseAnonKey,
   );
 
-  //PARA PRODUCCIÓN, DESCOMENTAR Y CONFIGURAR LAS VARIABLES DE ENTORNO EN EL ARCHIVO .env
-  //await Supabase.initialize(
-  //  url: const String.fromEnvironment('SUPABASE_URL'),
-  //  anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
-  // );
-
   runApp(const MyApp());
 }
 
