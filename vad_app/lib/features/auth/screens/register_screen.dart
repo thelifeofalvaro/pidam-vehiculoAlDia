@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/services/auth_service.dart';
 
@@ -87,9 +88,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'crear tu cuenta'),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => isLoading = false);

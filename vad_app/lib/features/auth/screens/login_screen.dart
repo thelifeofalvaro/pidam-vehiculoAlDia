@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/services/auth_service.dart';
 
@@ -40,9 +41,13 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'iniciar sesión'),
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {

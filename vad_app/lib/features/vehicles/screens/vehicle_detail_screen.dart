@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 import 'package:vad_app/core/app_text_styles.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
@@ -74,11 +75,27 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                               );
 
                               if (result == true && context.mounted) {
-                                final updated = await VehicleRepository()
-                                    .getVehicleById(vehicle.id);
-                                setState(() {
-                                  _vehicle = updated;
-                                });
+                                try {
+                                  final updated = await VehicleRepository()
+                                      .getVehicleById(vehicle.id);
+                                  setState(() {
+                                    _vehicle = updated;
+                                  });
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          ErrorUtils.mensajeLegible(
+                                            e,
+                                            contexto:
+                                                'actualizar los datos del vehículo',
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
                               }
                             },
                           ),
@@ -224,12 +241,27 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
 
                             /// Función de refresco, tambien cambia al añadir una nueva intervención
                             if (result == true) {
-                              final updated = await VehicleRepository()
-                                  .getVehicleById(vehicle.id);
-
-                              setState(() {
-                                _vehicle = updated;
-                              });
+                              try {
+                                final updated = await VehicleRepository()
+                                    .getVehicleById(vehicle.id);
+                                setState(() {
+                                  _vehicle = updated;
+                                });
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        ErrorUtils.mensajeLegible(
+                                          e,
+                                          contexto:
+                                              'refrescar los datos del vehículo',
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
                             }
                           },
                           child: Text(
@@ -277,24 +309,14 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
+            style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.bold,
-              fontFamily: 'Inter',
               color: AppColors.carbonBlack,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontFamily: 'Roboto',
-              color: AppColors.secondarySteel,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Text(label, style: AppTextStyles.label, textAlign: TextAlign.center),
         ],
       ),
     );

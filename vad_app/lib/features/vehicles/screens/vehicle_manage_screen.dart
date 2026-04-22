@@ -5,6 +5,7 @@ import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
 import 'package:vad_app/core/app_text_styles.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
@@ -159,9 +160,16 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(
+              e,
+              contexto: 'subir la imagen del vehículo',
+            ),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _guardando = false);
     }
@@ -210,9 +218,13 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al eliminar: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'eliminar el vehículo'),
+          ),
+        ),
+      );
     } finally {
       if (mounted) setState(() => _eliminando = false);
     }

@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart';
@@ -64,7 +65,14 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error cargando intervenciones: $e')),
+          SnackBar(
+            content: Text(
+              ErrorUtils.mensajeLegible(
+                e,
+                contexto: 'cargar las intervenciones',
+              ),
+            ),
+          ),
         );
       }
     }
@@ -107,7 +115,11 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       await _uploadToSupabase(intervention, file, processedBytes);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error seleccionando archivo: $e')),
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'subir el archivo'),
+          ),
+        ),
       );
     }
   }
@@ -153,7 +165,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error subiendo archivo: $e')));
+      ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
     }
   }
 
@@ -615,7 +627,14 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       }
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error eliminando archivo: $e')),
+                        SnackBar(
+                          content: Text(
+                            ErrorUtils.mensajeLegible(
+                              e,
+                              contexto: 'eliminar el archivo',
+                            ),
+                          ),
+                        ),
                       );
                     }
                   },

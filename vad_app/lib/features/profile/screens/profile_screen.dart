@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../core/app_color.dart';
 import '../../../core/app_text_styles.dart';
@@ -67,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error cargando perfil: $e')));
+        ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
       }
     }
   }
@@ -149,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error guardando perfil: $e')));
+      ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -190,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error eliminando perfil: $e')));
+      ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
     } finally {
       if (mounted) setState(() => _isDeleting = false);
     }
@@ -252,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error subiendo imagen: $e')));
+      ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
     }
   }
 
@@ -286,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error eliminando imagen: $e')));
+      ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
     }
   }
 

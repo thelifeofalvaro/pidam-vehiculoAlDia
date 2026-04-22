@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
@@ -126,9 +127,13 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       Navigator.pop(context, true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ErrorUtils.mensajeLegible(e, contexto: 'guardar la intervención'),
+            ),
+          ),
+        );
       }
     }
   }
@@ -163,9 +168,16 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         Navigator.pop(context, true);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error al eliminar: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                ErrorUtils.mensajeLegible(
+                  e,
+                  contexto: 'eliminar la intervención',
+                ),
+              ),
+            ),
+          );
         }
       }
     }
@@ -220,9 +232,13 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         const SnackBar(content: Text('Archivo subido correctamente')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error subiendo archivo: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'subir el archivo'),
+          ),
+        ),
+      );
     }
   }
 
@@ -246,9 +262,13 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Archivo eliminado')));
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error eliminando archivo: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'eliminar el archivo'),
+          ),
+        ),
+      );
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:vad_app/data/repositories/vehicle_repository.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,9 +36,13 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       setState(() => isLoading = false);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error cargando vehículos: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'cargar tus vehículos'),
+          ),
+        ),
+      );
     }
   }
 
