@@ -1,5 +1,3 @@
-// TODO: Aplicar esta clase en toda la app para estandarizar los estilos de texto
-
 import 'package:flutter/material.dart';
 import 'app_color.dart';
 

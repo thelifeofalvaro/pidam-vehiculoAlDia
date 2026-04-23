@@ -20,7 +20,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   /// Comprobar sesión inciada
   void checkSession() async {
-    await Future.delayed(const Duration(seconds: 1)); // opcional (mejor UX)
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (!mounted) return;
 
     final user = Supabase.instance.client.auth.currentUser;
 

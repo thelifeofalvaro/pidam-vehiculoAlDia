@@ -36,6 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       setState(() => isLoading = false);
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -145,6 +147,7 @@ class _HomeEmptyState extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const Spacer(),
                 ],
               ),
             ),
@@ -152,7 +155,6 @@ class _HomeEmptyState extends StatelessWidget {
         ],
       ),
     );
-    const Spacer();
   }
 }
 
@@ -222,10 +224,11 @@ class _HomeWithData extends StatelessWidget {
                                       child: Image.network(
                                         v.imageUrl!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Image.asset(
-                                          'assets/images/vacio_vehiculos.png',
-                                          fit: BoxFit.contain,
-                                        ),
+                                        errorBuilder: (_, __, ____) =>
+                                            Image.asset(
+                                              'assets/images/vacio_vehiculos.png',
+                                              fit: BoxFit.contain,
+                                            ),
                                       ),
                                     )
                                   : Image.asset(

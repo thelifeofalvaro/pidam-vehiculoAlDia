@@ -126,15 +126,14 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              ErrorUtils.mensajeLegible(e, contexto: 'guardar la intervención'),
-            ),
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'guardar la intervención'),
           ),
-        );
-      }
+        ),
+      );
     }
   }
 
@@ -167,18 +166,17 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         if (!mounted) return;
         Navigator.pop(context, true);
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                ErrorUtils.mensajeLegible(
-                  e,
-                  contexto: 'eliminar la intervención',
-                ),
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ErrorUtils.mensajeLegible(
+                e,
+                contexto: 'eliminar la intervención',
               ),
             ),
-          );
-        }
+          ),
+        );
       }
     }
   }
@@ -232,6 +230,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         const SnackBar(content: Text('Archivo subido correctamente')),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -262,6 +261,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Archivo eliminado')));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

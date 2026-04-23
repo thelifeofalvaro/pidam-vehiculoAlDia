@@ -114,6 +114,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
       await _uploadToSupabase(intervention, file, processedBytes);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -163,6 +164,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(ErrorUtils.mensajeLegible(e))));
@@ -202,10 +204,10 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pop(context, hasChanges);
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) Navigator.pop(context, hasChanges);
       },
       child: Scaffold(
         backgroundColor: AppColors.cardWhite,
@@ -626,6 +628,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                         );
                       }
                     } catch (e) {
+                      if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(

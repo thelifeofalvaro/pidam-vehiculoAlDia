@@ -153,7 +153,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryBlue.withOpacity(0.1),
+                                color: AppColors.primaryBlue.withValues(
+                                  alpha: 0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

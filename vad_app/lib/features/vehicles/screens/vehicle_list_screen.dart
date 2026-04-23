@@ -33,6 +33,8 @@ class _VehicleListScreenState extends State<VehicleListScreen> {
     } catch (e) {
       setState(() => isLoading = false);
 
+      if (!mounted) return;
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error cargando vehículos: $e')));
