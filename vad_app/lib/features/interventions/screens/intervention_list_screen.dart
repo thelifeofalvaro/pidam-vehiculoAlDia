@@ -105,6 +105,8 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
       final fileBytes = file.bytes;
       if (fileBytes == null) return;
 
+      if (!mounted) return;
+
       final processedBytes = await FileUtils.processFile(
         bytes: fileBytes,
         extension: file.extension ?? '',
@@ -622,13 +624,13 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       loadInterventions();
                       hasChanges = true;
 
-                      if (mounted) {
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Archivo eliminado')),
                         );
                       }
                     } catch (e) {
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(

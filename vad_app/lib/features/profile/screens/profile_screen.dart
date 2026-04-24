@@ -210,6 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final file = result.files.first;
 
+      if (!mounted) return;
       final processedBytes = await FileUtils.processFile(
         bytes: file.bytes!,
         extension: file.extension ?? '',
@@ -602,7 +603,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     );
                                     if (confirm != true) return;
                                     await _authService.signOut();
-                                    if (!mounted) return;
+                                    if (!context.mounted) return;
                                     Navigator.of(
                                       context,
                                     ).pushNamedAndRemoveUntil(

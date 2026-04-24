@@ -265,6 +265,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
 
     final publicUrl = supabase.storage.from('archive').getPublicUrl(path);
 
+    if (!mounted) return;
     setState(() {
       _imageUrl = publicUrl;
     });

@@ -96,6 +96,8 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
   }
 
   Future<void> save() async {
+    if (!mounted) return;
+
     if (tipoSeleccionado == null || lugarSeleccionado == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor completa todos los campos')),
@@ -222,6 +224,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
           .from(FileUtils.bucket)
           .getPublicUrl(path);
 
+      if (!mounted) return;
       setState(() {
         documentoAdjunto = publicUrl;
       });
@@ -257,6 +260,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
         documentoAdjunto = null;
       });
 
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Archivo eliminado')));

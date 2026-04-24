@@ -191,7 +191,7 @@ class _HomeWithData extends StatelessWidget {
                 child: ListView.separated(
                   itemCount: vehicles.length,
                   padding: const EdgeInsets.only(bottom: 92),
-                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                  separatorBuilder: (_, _) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
                     final v = vehicles[index];
                     return GestureDetector(
@@ -224,11 +224,10 @@ class _HomeWithData extends StatelessWidget {
                                       child: Image.network(
                                         v.imageUrl!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ____) =>
-                                            Image.asset(
-                                              'assets/images/vacio_vehiculos.png',
-                                              fit: BoxFit.contain,
-                                            ),
+                                        errorBuilder: (_, _, _) => Image.asset(
+                                          'assets/images/vacio_vehiculos.png',
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
                                     )
                                   : Image.asset(
