@@ -26,6 +26,8 @@ FOR UPDATE
 USING (auth.uid() = id)
 WITH CHECK (auth.uid() = id);
 
+-- El usuario puede borrar su perfil
+
 -- =========================
 -- VEHICULOS
 -- =========================
