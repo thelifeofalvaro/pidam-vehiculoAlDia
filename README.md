@@ -131,10 +131,44 @@ pidam-vehiculoAlDia/
  
 - [`database/database.md`](database/database.md) — Esquema de la base de datos, políticas RLS e integración con Supabase Auth
 - [`docs/supabase/supabase.md`](docs/supabase/supabase.md) — Configuración del entorno Supabase, Storage y despliegue
+
+## Instalación y configuración
+
+### Requisitos previos
  
+- Flutter SDK instalado y configurado
+- Cuenta en Supabase con el proyecto configurado
+- Android Studio o VS Code con las extensiones de Flutter/Dart
+- Para build iOS: Mac con Xcode instalado o emuladores.
+
+### 1. Clonar el repositorio
+ 
+```bash
+git clone https://github.com/thelifeofalvaro/pidam-vehiculoAlDia.git
+cd pidam-vehiculoAlDia/vad_app
+```
+ 
+### 2. Instalar dependencias
+ 
+```bash
+flutter pub get
+```
+ 
+### 3. Configurar las credenciales de Supabase
+ 
+Crea el archivo `dart_defines.json` en la raíz del proyecto, con tus credenciales:
+ 
+```json
+{
+  "SUPABASE_URL": "https://tu-proyecto.supabase.co",
+  "SUPABASE_ANON_KEY": "tu-anon-key"
+}
+```
+ 
+Las credenciales se encuentran en el dashboard de Supabase en **Settings → API**.
 
 ## Estado del proyecto
-Pendiente de entrega final.
+Finalizado. Pendiente de evaluación y defensa.
 
 ## Autor
 Alvaro Medina - 2ºDAM Prometeo FP
