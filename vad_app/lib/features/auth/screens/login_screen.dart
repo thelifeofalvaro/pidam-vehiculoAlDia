@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      hintText: 'Constraseña',
+                      hintText: 'Contraseña',
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
