@@ -29,13 +29,39 @@ Para la gestión de estados se usa el ```setState``` nativo de Flutter
 
 ## Funcionalidades
 ### Autenticación
+- Registro de nuevos usuarios con validación de email y contraseña.
+- Inicio de sesión.
+- Cierre de sesión con confirmación.
+- Verificación de sesión activa al arrancar (SplashScreen).
 ### Gestión de vehículos
+- CRUD Completo de vehículos.
+- Campos: marca/modelo, matrícula, bastidor, tipo, año, kilometraje.
+- Posibilidad de subir foto del vehículo a Supabase Storage.
+- Eliminación en cascada: al borrar un vehículo se eliminan todas sus intervenciones.
 ### Registro de intervenciones
+- CRUD Completo de intervenciones.
+- Registro datos: tipo, lugar (casa/taller), fecha, kilometraje, coste, descripción y notas adicionales.
+- Posibilidad de adjuntar documentos (facturas, tickets) relacionados (formato JPG, PNG o PDF hasta 2MB).
+- Compresión automática de imágenes que superen 1MB.
+- Filtro de intervenciones por tipo de intervención.
+- Suma gasto total acumulado por vehículo.
 ### Perfil de usuario
+- Modo vista y edición separados.
+- Actualización de nombre de usuario y contraseña
+- Posibilidad de añadir foto de perfil (Supabase Storage)
+- Posiblidad de eliminación de cuenta (lógica)
 ### Seguridad
-
+- Datos protegidos con Row Level Security (RLS) en PostgreSQL
+- Cada usuario solo accede a sus propios datos
+- Credenciales nunca en el código fuente
 ## Estructura de carpetas
 [EN CONSTRUCCIÓN]
+
+## Documentación adicional
+ 
+- [`database/database.md`](database/database.md) — Esquema de la base de datos, políticas RLS e integración con Supabase Auth
+- [`docs/supabase/supabase.md`](docs/supabase/supabase.md) — Configuración del entorno Supabase, Storage y despliegue
+ 
 
 ## Estado del proyecto
 Pendiente de entrega final.
