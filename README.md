@@ -117,10 +117,12 @@ pidam-vehiculoAlDia/
 │   │   ├── macos/
 │   │   ├── web/
 │   │   ├── windows/
+│   │   ├── .gitignore
+│   │   ├── .metadata
 │   │   ├── analysis_option.yaml
 │   │   ├── devtools_options.yaml
-│   │   ├── pubspec.yaml
-│   │   └── run_dev.bat
+│   │   ├── pubspec.lock
+│   │   └── pubspec.yaml
 ├── README.md         # Este archivo
 ├── package-lock.json
 └── package.json
