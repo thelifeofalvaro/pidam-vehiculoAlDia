@@ -47,16 +47,84 @@ Para la gestión de estados se usa el ```setState``` nativo de Flutter
 - Suma gasto total acumulado por vehículo.
 ### Perfil de usuario
 - Modo vista y edición separados.
-- Actualización de nombre de usuario y contraseña
-- Posibilidad de añadir foto de perfil (Supabase Storage)
-- Posiblidad de eliminación de cuenta (lógica)
+- Actualización de nombre de usuario y contraseña.
+- Posibilidad de añadir foto de perfil (Supabase Storage).
+- Posiblidad de eliminación de cuenta (lógica).
 ### Seguridad
-- Datos protegidos con Row Level Security (RLS) en PostgreSQL
-- Cada usuario solo accede a sus propios datos
-- Credenciales nunca en el código fuente
+- Datos protegidos con Row Level Security (RLS) en PostgreSQL.
+- Cada usuario solo accede a sus propios datos.
+- Credenciales de Supabase en `dart_defines.json` (archivo dentro del .gitignore por seguridad, no se sube a GitHub)
 ## Estructura de carpetas
-[EN CONSTRUCCIÓN]
-
+```
+pidam-vehiculoAlDia/
+├── database/
+│   ├── 01.schema.sql
+│   ├── 02.rls.sql
+│   ├── 03.integracion_authUsers.sql
+│   ├── 04.modificaciones_bbdd.sql
+│   └── database.md
+├── docs/
+│   ├── anteproyecto/
+│   │   └── Anterproyecto PIDAM VehiculoAlDia.pdf
+│   ├── diagramas/
+│   │   ├── Arquitectura.jpg
+│   │   ├── CasosDeUso.jpg
+│   │   ├── DER.jpg
+│   │   ├── DiagramaDeClases.jpg
+│   │   ├── db_schema.png
+│   │   └── esquema_red.png
+│   └── supabase/
+│        └── supbase.md
+├── node_modules/
+├── vad_app/                                   # Aplicación principal Flutter
+│   │   ├── android/
+│   │   ├── assets/images/                     # Imagenes varias
+│   │   ├── ios/
+│   │   ├── lib/
+│   │   │   ├── core/                          # Utilidades y constantes reutilizables
+│   │   │   │   ├── app_color.dart             # Paleta de colores de la app
+│   │   │   │   ├── app_config.dart            # Configuración (credenciales Supabase)
+│   │   │   │   ├── app_text_styles.dart       # Estilos de texto centralizados
+│   │   │   │   └── utils/
+│   │   │   │       ├── error_utils.dart       # Mensajes de error legibles
+│   │   │   │       └── file_utils.dart        # Validación y compresión de archivos
+│   │   │   │
+│   │   │   ├── data/                          # Capa de datos
+│   │   │   │   ├── models/                    # Modelos de datos (fromJson/toJson)
+│   │   │   │   │   ├── intervention_model.dart
+│   │   │   │   │   ├── profile_model.dart
+│   │   │   │   │   └── vehicle_model.dart
+│   │   │   │   ├── repositories/              # Acceso a Supabase
+│   │   │   │   │   ├── intervention_repository.dart
+│   │   │   │   │   ├── profile_repository.dart
+│   │   │   │   │   └── vehicle_repository.dart
+│   │   │   │   └── services/                  # Servicios externos
+│   │   │   │       └── auth_service.dart      # Autenticación con Supabase Auth
+│   │   │   │
+│   │   │   ├── features/                      # Módulos funcionales (pantallas)
+│   │   │   │   ├── auth/screens/              # Login y registro
+│   │   │   │   ├── interventions/screens/     # Listado y gestión de intervenciones
+│   │   │   │   ├── profile/screens/           # Perfil de usuario
+│   │   │   │   └── vehicles/screens/          # Gestión de vehículos
+│   │   │   │
+│   │   │   ├── presentation/                  # Componentes de presentación compartidos
+│   │   │   │   ├── screens/                   # Pantallas globales (home, splash)
+│   │   │   │   └── widgets/                   # Widgets reutilizables
+│   │   │   │       └── app_bottom_nav_bar.dart
+│   │   │   │
+│   │   │   └── main.dart                      # Punto de entrada, rutas y configuración
+│   │   ├── linux/
+│   │   ├── macos/
+│   │   ├── web/
+│   │   ├── windows/
+│   │   ├── analysis_option.yaml
+│   │   ├── devtools_options.yaml
+│   │   ├── pubspec.yaml
+│   │   └── run_dev.bat
+├── README.md         # Este archivo
+├── package-lock.json
+└── package.json
+```
 ## Documentación adicional
  
 - [`database/database.md`](database/database.md) — Esquema de la base de datos, políticas RLS e integración con Supabase Auth
