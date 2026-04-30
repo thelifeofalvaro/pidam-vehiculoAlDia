@@ -167,7 +167,7 @@ Crea el archivo `dart_defines.json` en la raíz del proyecto, con tus credencial
  
 Las credenciales se encuentran en el dashboard de Supabase en **Settings → API**.
 
-### 4. Lanzar el proyecto en modo debug (localhost)
+### 4. Lanzar el proyecto en modo localhost
 
 #### Opción 1
  
