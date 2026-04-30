@@ -1,8 +1,16 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/profile_model.dart';
 
+/// Repositorio de perfil de usuario.
+
 class ProfileRepository {
   final supabase = Supabase.instance.client;
+
+  /// Obtiene el perfil del usuario autenticado.
+  /// Usa maybeSingle() para evitar excepciones
+  /// Aunque se gestiona externamente con la
+  /// condición de Supabase de validar mail
+  /// para poder iniciar sesión
 
   Future<Profile?> getProfile() async {
     final user = supabase.auth.currentUser;
@@ -23,6 +31,8 @@ class ProfileRepository {
     );
   }
 
+  /// Actualiza nombre y avatar en la tabla usuarios.
+  /// No se toca el email, pprque es de Supabase Auth
   Future<void> updateProfile(Profile profile) async {
     final supabase = Supabase.instance.client;
     final user = supabase.auth.currentUser;

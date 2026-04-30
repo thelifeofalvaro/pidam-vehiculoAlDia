@@ -1,10 +1,15 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+/// Servicio de autenticación. Centraliza las operaciones de
+/// login, registro y cierre de sesión con Supabase Auth.
+
 class AuthService {
   // Cliente de Supabase
   final SupabaseClient _client = Supabase.instance.client;
 
-  /// Registro
+  /// Registra un nuevo usuario en Supabase Auth.
+  /// Supabase envía un email de confirmación automáticamente.
+  /// El usuario no puede iniciar sesión hasta validar el correo.
   Future<void> signUp({
     required String email,
     required String password,
@@ -19,7 +24,9 @@ class AuthService {
     );
   }
 
-  /// Login - Inicio Sesión
+  /// Inicia sesión con email y contraseña.
+  /// Lanza excepción si las credenciales son incorrectas
+  /// o si el email no ha sido confirmado todavía.
   Future<AuthResponse> signIn({
     required String email,
     required String password,

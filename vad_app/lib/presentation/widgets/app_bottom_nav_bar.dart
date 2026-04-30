@@ -4,6 +4,13 @@ import 'package:vad_app/data/models/vehicle_model.dart';
 import '../../core/app_color.dart';
 import '../../core/app_text_styles.dart';
 
+/// Barra de navegación inferior compartida por todas las pantallas.
+/// [currentIndex]: 0 = Inicio, 1 = Historial, 2 = Perfil,
+/// Añadido tambien el -1 = ninguno, para pantallas "intermedias".
+/// [vehicle] es opcional. Si se proporciona, el tab Historial navega
+/// directamente al historial de ese vehículo. Si es null, muestra
+/// un SnackBar pidiendo al usuario que seleccione un vehículo primero.
+
 class AppBottomNavBar extends StatelessWidget {
   /// Índice del tab activo: 0=Inicio, 1=Historial, 2=Perfil
   final int currentIndex;

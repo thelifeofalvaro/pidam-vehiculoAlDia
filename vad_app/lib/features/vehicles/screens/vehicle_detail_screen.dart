@@ -7,6 +7,13 @@ import 'package:vad_app/core/utils/error_utils.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
 
+/// Pantalla de detalle de un vehículo.
+/// Recibe el Vehicle como argumento de navegación)
+/// siguiendo el patrón de rutas de la app.
+/// Se refresca con getVehicleById() al volver de:
+/// - Editar el vehículo (puede cambiar cualquier campo)
+/// - El historial (puede cambiar el km de la última intervención)
+
 class VehicleDetailScreen extends StatefulWidget {
   const VehicleDetailScreen({super.key});
 
@@ -282,11 +289,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
               ),
             ),
 
-            /// BOTTOM TAB BAR
-            AppBottomNavBar(
-              currentIndex: -1, //Ninguno seleccionado, detalle para mejorar UI
-              vehicle: vehicle,
-            ),
+            // currentIndex: -1 → ningún tab activo. Mejora UI
+            // vehicle: permite navegar al historial desde la navbar inferior.
+            AppBottomNavBar(currentIndex: -1, vehicle: vehicle),
           ],
         ),
       ),

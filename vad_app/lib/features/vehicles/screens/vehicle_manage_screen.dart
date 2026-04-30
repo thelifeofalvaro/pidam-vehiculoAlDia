@@ -10,6 +10,12 @@ import 'package:vad_app/core/utils/error_utils.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/vehicle_repository.dart';
 
+/// Pantalla de alta y edición de vehículos.
+///
+/// Funciona en dos modos según el argumento de navegación:
+/// - null → modo creación (campos vacíos)
+/// - Vehicle → modo edición (campos pre-rellenos)
+
 class VehicleManageScreen extends StatefulWidget {
   const VehicleManageScreen({super.key});
 
@@ -41,6 +47,8 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   bool _eliminando = false;
 
   Vehicle? _vehicleEditando;
+
+  /// Este getter determina si estamos en modo edición o creación según booleano
   bool get _isEditing => _vehicleEditando != null;
 
   @override
@@ -89,6 +97,8 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
     setState(() => _guardando = true);
 
     try {
+      // El usuario_id se obtiene de Auth aquí, no como parámetro,
+      // para garantizar que nadie puede crear un vehículo con el usuario_id de otro.
       final user = Supabase.instance.client.auth.currentUser;
 
       if (user == null) {
@@ -230,6 +240,9 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
     }
   }
 
+  /// La imagen se sube a Storage antes de guardar el vehículo.
+  /// Su URL pública se almacena en image_url de la tabla vehiculos.
+  /// Si no hay imagen, image_url es null y se muestra el placeholder.
   Future<void> _pickAndUploadImage() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,

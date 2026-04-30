@@ -1,3 +1,6 @@
+/// Modelo que representa un vehículo registrado por el usuario.
+/// Corresponde a la tabla [vehiculos] en Supabase.
+
 class Vehicle {
   final String id;
   final String usuarioId;
@@ -24,6 +27,8 @@ class Vehicle {
   });
 
   /// JSON → objeto
+  /// Construye un Vehicle desde la respuesta JSON de Supabase.
+  /// Nota: el año se almacena como [a_matricula] en la BBDD.
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
       id: json['id'],
@@ -40,6 +45,8 @@ class Vehicle {
   }
 
   /// objeto → JSON
+  /// Serializa para insertar o actualizar en Supabase.
+  /// No incluye [id] en creaciones — Supabase lo genera con gen_random_uuid().
   Map<String, dynamic> toJson() {
     return {
       'usuario_id': usuarioId,

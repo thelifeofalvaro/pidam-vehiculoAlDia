@@ -11,6 +11,11 @@ import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
 import '../../../data/repositories/intervention_repository.dart';
 
+/// Pantalla de alta y edición de intervenciones.
+/// Funciona en dos modos según el argumento de navegación:
+/// - Vehicle → modo creación (nueva intervención para ese vehículo)
+/// - Intervention → modo edición (campos pre-rellenos)
+
 class InterventionManageScreen extends StatefulWidget {
   const InterventionManageScreen({super.key});
 
@@ -34,13 +39,14 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
   DateTime? fechaSeleccionada;
   String? documentoAdjunto;
 
-  // Data
+  // Datos recibidos por navegación (pueden ser Vehicle o Intervention según modo)
   late dynamic argumentos;
   late Vehicle vehicle;
   model.Intervention? interventionToEdit;
   bool isEditing = false;
 
-  // Dropdown options
+  // Los valores de los dropdowns deben coincidir EXACTAMENTE con el ENUM de PostgreSQL.
+  // Ej: 'revisión' con tilde es válido; 'revision' sin tilde da error de BBDD.
   final tipos = ['reparación', 'modificación', 'mejora', 'revisión', 'otros'];
   String formatTipos(String value) {
     return value[0].toUpperCase() + value.substring(1);
@@ -183,6 +189,8 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     }
   }
 
+  /// El documento adjunto se sube a Storage antes de llamar a save().
+  /// Su URL pública se almacena en url_adjunto de la tabla intervenciones.
   Future<void> _pickAndUploadFile() async {
     try {
       final result = await FilePicker.platform.pickFiles(

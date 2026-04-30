@@ -1,5 +1,10 @@
-/// Pantalla Inicio Sesión
-library;
+/// Pantalla de inicio de sesión.
+///
+/// Flujo:
+/// 1. Usuario introduce email y contraseña
+/// 2. Se llama a AuthService.signIn()
+/// 3. Si éxito → navega a /home reemplazando la ruta actual
+/// 4. Si error → SnackBar con mensaje amigable
 
 import 'package:flutter/material.dart';
 import 'package:vad_app/core/app_color.dart';
@@ -48,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       );
+      // isLoading en finally garantiza que el botón se reactiva en todos los casos
     } finally {
       if (mounted) {
         setState(() {
@@ -174,6 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
+                      // El botón se desactiva durante la petición para evitar envíos duplicados.
                       onPressed: isLoading ? null : login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.actionOrange,

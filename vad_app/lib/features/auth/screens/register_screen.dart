@@ -1,5 +1,10 @@
-/// Pantalla Registro Usuario
-library;
+/// Pantalla de registro de nuevos usuarios.
+///
+/// Validaciones antes de llamar a Supabase:
+/// - Todos los campos rellenos
+/// - Nombre de usuario sin espacios (restricción de la tabla usuarios)
+/// - Email con formato válido (regex)
+/// - Las dos contraseñas coinciden
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -145,6 +150,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 24),
                   TextField(
                     controller: nameController,
+                    // FilteringTextInputFormatter impide escribir espacios en el nombre
+                    // directamente desde el teclado, complementando la validación por código.
                     inputFormatters: [
                       FilteringTextInputFormatter.deny(RegExp(r'\s')),
                     ],

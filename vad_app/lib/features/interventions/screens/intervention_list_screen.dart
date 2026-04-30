@@ -11,6 +11,8 @@ import '../../../data/models/intervention_model.dart';
 import '../../../data/repositories/intervention_repository.dart';
 import 'dart:typed_data';
 
+/// Historial de intervenciones de un vehículo en formato timeline
+
 class InterventionListScreen extends StatefulWidget {
   final Vehicle vehicle;
 
@@ -25,6 +27,9 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
   List<Intervention> interventions = [];
   bool isLoading = true;
   String selectedFilterType = 'Todo';
+
+  /// [hasChanges] rastrea si hubo modificaciones durante la sesión.
+  /// Se devuelve al hacer pop para que vehicle_detail_screen refresque.
   bool hasChanges = false;
 
   @override
@@ -33,6 +38,9 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
     loadInterventions();
   }
 
+  /// Filtra la lista según el tipo seleccionado.
+  /// 'Todo' devuelve la lista completa sin filtrar.
+  /// El resto devuelven solo las intervenciones que contienen el tipo en su descripción
   List<Intervention> get filteredInterventions {
     if (selectedFilterType == 'Todo') return interventions;
 
@@ -173,6 +181,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
     }
   }
 
+  /// Calcula el gasto total de TODAS las intervenciones del vehículo, sin importar el filtro aplicado.
   double getTotalCost() {
     return interventions.fold<double>(
       0,
@@ -206,6 +215,9 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Se usa PopScope en lugar de WillPopScope, por desuso desde Flutter 3.12 (Comentado por )
+    // canPop: false fuerza el paso por onPopInvokedWithResult
+    // para devolver hasChanges al hacer pop.
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {

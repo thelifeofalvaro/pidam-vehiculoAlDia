@@ -18,6 +18,8 @@ import 'presentation/screens/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Recogemos las credenciales de Supabase desde AppConfig y las inicializamos
+  // Ver lib/core/app_config.dart para más detalles
   await Supabase.initialize(
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,
@@ -44,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/vehicles': (context) => const VehicleListScreen(),
         '/vehicle-manage': (context) => const VehicleManageScreen(),
         '/vehicle-detail': (context) => const VehicleDetailScreen(),
+        // La ruta de la lista de intervenciones recibe un vehículo como argumento obligatorio para mostrar solo sus intervenciones
         '/intervention-list': (context) {
           final vehicle = ModalRoute.of(context)!.settings.arguments as Vehicle;
           return InterventionListScreen(vehicle: vehicle);
@@ -52,6 +55,7 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => const ProfileScreen(),
       },
 
+      // Configuración de localización para soportar español
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

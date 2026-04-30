@@ -1,3 +1,9 @@
+/// Modelo que representa una intervención sobre un vehículo.
+/// Corresponde a la tabla [intervenciones] en Supabase.
+/// La relación con el vehículo es a través de [vehiculoId] (FK).
+/// Si el vehículo se elimina, la intervención se elimina en cascada
+/// automáticamente gracias a la restricción ON DELETE CASCADE de la BBDD.
+
 class Intervention {
   final String id;
   final String vehiculoId;
@@ -22,6 +28,10 @@ class Intervention {
     this.fechaIntervencion,
     this.lugar,
   });
+
+  /// Los timestamps llegan como String desde Supabase.
+  /// Se parsean con DateTime.parse() para evitar excepciones
+  /// si el campo es null o tiene formato inesperado.
 
   factory Intervention.fromMap(Map<String, dynamic> map) {
     return Intervention(

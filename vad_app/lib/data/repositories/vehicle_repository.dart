@@ -1,10 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/vehicle_model.dart';
 
+/// Repositorio de vehículos. Encapsula todas las operaciones con Supabase.
+
 class VehicleRepository {
   final _client = Supabase.instance.client;
 
-  /// Obtener vehículos del usuario
+  /// Obtiene todos los vehículos del usuario autenticado,
+  /// ordenados por fecha de creación (más antiguo primero).
   Future<List<Vehicle>> getVehicles() async {
     final user = _client.auth.currentUser;
 
@@ -21,7 +24,9 @@ class VehicleRepository {
     return (response as List).map((e) => Vehicle.fromJson(e)).toList();
   }
 
-  /// Crear vehículo
+  /// Crea un nuevo vehículo. El usuario_id se extrae de Auth
+  /// en lugar de recibirlo como parámetro, para garantizar que
+  /// nadie puede crear un vehículo con el usuario_id de otro usuario.
   Future<void> createVehicle(Vehicle vehicle) async {
     final user = _client.auth.currentUser;
 
@@ -48,6 +53,8 @@ class VehicleRepository {
     await _client.from('vehiculos').delete().eq('id', vehicleId);
   }
 
+  /// Obtiene un vehículo por ID. Se usa tras editar o volver del
+  /// historial para refrescar los datos de pantalla sin recargar toda la lista.
   Future<Vehicle> getVehicleById(String id) async {
     final response = await _client
         .from('vehiculos')

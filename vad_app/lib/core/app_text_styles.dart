@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'app_color.dart';
 
+/// Estilos de texto centralizados.
+/// Para variantes, usamos el método copyWith():
+/// Ejemlo: AppTextStyles.bodyMedium.copyWith(color: AppColors.primaryBlue)
+
+/// Fuentes: Inter (títulos y botones), Roboto (cuerpo y etiquetas).
+
 class AppTextStyles {
   AppTextStyles._();
 
-  // Títulos
+  /// Título principal
   static const TextStyle heading1 = TextStyle(
     fontFamily: 'Inter',
     fontSize: 22,
@@ -13,6 +19,7 @@ class AppTextStyles {
     color: AppColors.primaryBlue,
   );
 
+  /// ítulo secundario
   static const TextStyle heading2 = TextStyle(
     fontFamily: 'Inter',
     fontSize: 18,
@@ -21,6 +28,7 @@ class AppTextStyles {
     color: AppColors.primaryBlue,
   );
 
+  /// Etiqueta de campo o titulo terciario
   static const TextStyle heading3 = TextStyle(
     fontFamily: 'Inter',
     fontSize: 16,
@@ -29,7 +37,7 @@ class AppTextStyles {
     color: AppColors.carbonBlack,
   );
 
-  // Cuerpo
+  /// Cuerpo de texto general
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: 'Inter',
     fontSize: 16,
@@ -38,6 +46,7 @@ class AppTextStyles {
     color: AppColors.carbonBlack,
   );
 
+  /// Cuerpo de texto secundario
   static const TextStyle bodyMedium = TextStyle(
     fontFamily: 'Inter',
     fontSize: 15,
@@ -46,6 +55,7 @@ class AppTextStyles {
     color: AppColors.textSteel,
   );
 
+  /// Texto compacto: hints y pequeñas etiquetas
   static const TextStyle bodySmall = TextStyle(
     fontFamily: 'Roboto',
     fontSize: 13,
@@ -54,7 +64,7 @@ class AppTextStyles {
     color: AppColors.textSteel,
   );
 
-  // Botones
+  /// Texto de botones
   static const TextStyle button = TextStyle(
     fontFamily: 'Inter',
     fontSize: 16,
@@ -63,7 +73,7 @@ class AppTextStyles {
     color: AppColors.carbonBlack,
   );
 
-  // Etiquetas / Secundario
+  /// Texto para etiquetas (secundario)
   static const TextStyle label = TextStyle(
     fontFamily: 'Roboto',
     fontSize: 11,
@@ -71,6 +81,7 @@ class AppTextStyles {
     color: AppColors.secondarySteel,
   );
 
+  /// Texto de información adicional
   static const TextStyle caption = TextStyle(
     fontFamily: 'Roboto',
     fontSize: 12,
@@ -78,7 +89,7 @@ class AppTextStyles {
     color: AppColors.secondarySteel,
   );
 
-  // NavBar
+  /// Texto para etiquetas de navegación (NavBar, TabBar)
   static const TextStyle navLabel = TextStyle(
     fontFamily: 'Roboto',
     fontSize: 13,

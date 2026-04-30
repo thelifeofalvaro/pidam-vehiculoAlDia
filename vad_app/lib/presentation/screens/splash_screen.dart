@@ -1,8 +1,13 @@
-/// Pantalla para comprobar el estado de la aplicación y redirigir al usuario a la pantalla de inicio o a la pantalla de inicio de sesión según corresponda.
-library;
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+/// Pantalla de carga inicial. Comprueba la sesión y redirige.
+///
+/// Flujo:
+/// 1. Espera 1 segundo (por si quisieramos poner el logo de la app o algo para indicar carga)
+/// 2. Comprueba supabase.auth.currentUser
+/// 3. Si hay sesión activa → /home
+/// 4. Si no hay sesión → /login
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

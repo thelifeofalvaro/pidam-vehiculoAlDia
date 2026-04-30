@@ -1,3 +1,9 @@
+/// Modelo que combina datos de Supabase Auth (auth.users)
+/// - [id] y [email] y [nombre] y [avatarUrl] de la tabla [usuarios]
+/// El email  solo se almacena en auth.users para evitar
+/// duplicidades en [usuarios]
+/// Se lee de: supabase.auth.currentUser?.email
+
 class Profile {
   final String id;
   final String? nombre;
@@ -14,6 +20,9 @@ class Profile {
       avatarUrl: json['avatar_url'],
     );
   }
+
+  /// No incluye 'email' en toJson() por lo mencionado anteriormente
+  /// Intentar actualizarlo daría error de permisos
 
   Map<String, dynamic> toJson() {
     return {'id': id, 'nombre': nombre, 'avatar_url': avatarUrl};

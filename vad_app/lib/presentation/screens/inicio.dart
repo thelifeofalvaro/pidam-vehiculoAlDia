@@ -6,6 +6,13 @@ import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/presentation/widgets/app_bottom_nav_bar.dart';
 import 'package:vad_app/core/utils/error_utils.dart';
 
+/// Pantalla principal. Muestra la lista de vehículos del usuario.
+/// Tiene dos estados:
+/// - _HomeEmptyState: el usuario no tiene vehículos registrados
+/// - _HomeWithData: hay al menos un vehículo
+/// Se refresca automáticamente al volver de crear o editar un vehículo
+/// comprobando el resultado de Navigator.pushNamed (result == true).
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -25,6 +32,8 @@ class _HomeScreenState extends State<HomeScreen> {
     loadVehicles();
   }
 
+  /// RLS garantiza que solo se devuelven los vehículos del usuario autenticado,
+  /// sin necesidad de filtrar manualmente por usuario_id en el código.
   Future<void> loadVehicles() async {
     try {
       final data = await _repository.getVehicles();
@@ -213,6 +222,8 @@ class _HomeWithData extends StatelessWidget {
                           color: AppColors.cloudWhite,
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        // Si el vehículo tiene foto, se muestra con errorBuilder que recae
+                        // en el placeholder si la imagen no carga (red caída, URL rota...).
                         child: Row(
                           children: [
                             SizedBox(

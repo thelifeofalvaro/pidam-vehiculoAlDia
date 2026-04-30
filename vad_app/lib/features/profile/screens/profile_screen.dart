@@ -11,6 +11,19 @@ import '../../../data/models/profile_model.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../presentation/widgets/app_bottom_nav_bar.dart';
 
+/// Pantalla de perfil con dos modos: vista y edición.
+///
+/// Modo vista (_isEditing = false):
+/// - Campos de solo lectura
+/// - Botón lápiz arriba a la derecha para entrar en edición
+/// - Botón cerrar sesión visible
+///
+/// Modo edición (_isEditing = true):
+/// - Nombre editable
+/// - Email visible pero bloqueado.
+/// - Contraseña y confirmación con toggle de visibilidad.
+/// - Botones Guardar Cambios y Eliminar Perfil
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -183,6 +196,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() => _isDeleting = true);
 
+    // context.mounted en lugar de mounted porque este código está
+    // dentro de un callback async anónimo (onPressed del botón cerrar sesión),
+    // no directamente en un método del State.
     try {
       await _authService.signOut();
       if (!context.mounted) return;
@@ -638,6 +654,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           controller: _nameController,
                           keyboardType: TextInputType.name,
                         ),
+
+                        // El email NO es editable. Cambiar el email en Supabase Auth
+                        // requiere verificación por el nuevo correo — flujo no implementado.
+                        // Se muestra desactivado para que el usuario sepa cuál es su email.
                         const SizedBox(height: 16),
                         _formField(
                           label: 'Email',
