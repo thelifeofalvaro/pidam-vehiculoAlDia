@@ -167,6 +167,27 @@ Crea el archivo `dart_defines.json` en la raíz del proyecto, con tus credencial
  
 Las credenciales se encuentran en el dashboard de Supabase en **Settings → API**.
 
+### 4. Lanzar el proyecto en modo localhost
+
+#### Opción 1
+ 
+Ejecuta en la terminal:
+ 
+```bash
+flutter run --dart-define-from-file=dart_defines.json
+```
+#### Opción 2
+
+Crea el archivo `run_dev.bat` que contenga el comando
+```bat
+--dart-define-from-file=dart_defines.json
+```
+Y ejecuta en la terminal
+
+```bash
+.\run_dev.bat 
+```
+
 ## Estado del proyecto
 Finalizado. Pendiente de evaluación y defensa.
 
