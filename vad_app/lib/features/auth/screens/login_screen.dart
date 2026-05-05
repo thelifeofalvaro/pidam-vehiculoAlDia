@@ -1,10 +1,9 @@
-/// Pantalla de inicio de sesión.
-///
-/// Flujo:
-/// 1. Usuario introduce email y contraseña
-/// 2. Se llama a AuthService.signIn()
-/// 3. Si éxito → navega a /home reemplazando la ruta actual
-/// 4. Si error → SnackBar con mensaje amigable
+// Pantalla de inicio de sesión.
+// Flujo:
+// 1. Usuario introduce email y contraseña
+// 2. Se llama a AuthService.signIn()
+// 3. Si éxito → navega a /home reemplazando la ruta actual
+// 4. Si error → SnackBar con mensaje amigable
 
 import 'package:flutter/material.dart';
 import 'package:vad_app/core/app_color.dart';

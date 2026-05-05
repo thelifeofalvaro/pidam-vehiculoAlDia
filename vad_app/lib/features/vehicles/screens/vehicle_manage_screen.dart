@@ -1,3 +1,6 @@
+import 'dart:io' as io;
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
@@ -244,44 +247,76 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   /// Su URL pública se almacena en image_url de la tabla vehiculos.
   /// Si no hay imagen, image_url es null y se muestra el placeholder.
   Future<void> _pickAndUploadImage() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['jpg', 'png', 'jpeg'],
-      withData: true,
-    );
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'png', 'jpeg'],
+        withData: true,
+      );
 
-    if (result == null) return;
+      if (result == null) return;
 
-    final file = result.files.first;
-    final processedBytes = await FileUtils.processFile(
-      bytes: file.bytes!,
-      extension: file.extension ?? '',
-      context: context,
-    );
+      final file = result.files.first;
 
-    if (processedBytes == null) return;
+      // En Android los bytes pueden venir nulos aunque withData: true.
+      // Se usa file.path como fallback para leerlos desde disco.
+      Uint8List? bytes = file.bytes;
+      if (bytes == null && file.path != null) {
+        bytes = await io.File(file.path!).readAsBytes();
+      }
+      if (bytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se pudo leer el archivo')),
+          );
+        }
+        return;
+      }
 
-    final supabase = Supabase.instance.client;
+      final processedBytes = await FileUtils.processFile(
+        bytes: bytes,
+        extension: file.extension ?? '',
+        context: context,
+      );
 
-    final fileName =
-        'vehiculo_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+      if (processedBytes == null) return;
 
-    final path = 'vehiculos/$fileName';
+      final supabase = Supabase.instance.client;
+      final fileName =
+          'vehiculo_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+      final path = 'vehiculos/$fileName';
 
-    await supabase.storage
-        .from('archive')
-        .uploadBinary(
-          path,
-          processedBytes,
-          fileOptions: const FileOptions(upsert: true),
-        );
+      await supabase.storage
+          .from('archive')
+          .uploadBinary(
+            path,
+            processedBytes,
+            fileOptions: const FileOptions(upsert: true),
+          );
 
-    final publicUrl = supabase.storage.from('archive').getPublicUrl(path);
+      final publicUrl = supabase.storage.from('archive').getPublicUrl(path);
 
-    if (!mounted) return;
-    setState(() {
-      _imageUrl = publicUrl;
-    });
+      if (!mounted) return;
+      setState(() {
+        _imageUrl = publicUrl;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Imagen subida correctamente')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(
+              e,
+              contexto: 'subir la imagen del vehículo',
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _deleteImage() async {
@@ -509,28 +544,7 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
                         decoration: _inputDecoration(hintText: 'Bastidor'),
                       ),
                     ),
-                    const SizedBox(height: 21),
-                    SizedBox(
-                      height: 48,
-                      child: TextField(
-                        controller: _bastidorController,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.carbonBlack,
-                        ),
-                        decoration: _inputDecoration(hintText: 'Bastidor'),
-                      ),
-                    ),
-                    const SizedBox(height: 21),
-                    SizedBox(
-                      height: 48,
-                      child: TextField(
-                        controller: _kilometrajeController,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.carbonBlack,
-                        ),
-                        decoration: _inputDecoration(hintText: 'Kilometraje'),
-                      ),
-                    ),
+
                     const SizedBox(height: 21),
                     SizedBox(
                       height: 48,

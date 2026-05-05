@@ -1,5 +1,5 @@
-/// Modelo que representa un vehículo registrado por el usuario.
-/// Corresponde a la tabla [vehiculos] en Supabase.
+// Modelo que representa un vehículo registrado por el usuario.
+// Corresponde a la tabla [vehiculos] en Supabase.
 
 class Vehicle {
   final String id;

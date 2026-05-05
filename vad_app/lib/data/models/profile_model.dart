@@ -1,8 +1,8 @@
-/// Modelo que combina datos de Supabase Auth (auth.users)
-/// - [id] y [email] y [nombre] y [avatarUrl] de la tabla [usuarios]
-/// El email  solo se almacena en auth.users para evitar
-/// duplicidades en [usuarios]
-/// Se lee de: supabase.auth.currentUser?.email
+// Modelo que combina datos de Supabase Auth (auth.users)
+// - [id] y [email] y [nombre] y [avatarUrl] de la tabla [usuarios]
+// El email  solo se almacena en auth.users para evitar
+// duplicidades en [usuarios]
+// Se lee de: supabase.auth.currentUser?.email
 
 class Profile {
   final String id;

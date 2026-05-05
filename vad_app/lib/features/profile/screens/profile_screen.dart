@@ -1,3 +1,6 @@
+import 'dart:io' as io;
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -226,9 +229,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final file = result.files.first;
 
-      if (!mounted) return;
+      // En Android los bytes pueden venir nulos aunque withData: true.
+      // Se usa file.path como fallback para leerlos desde disco.
+      Uint8List? bytes = file.bytes;
+      if (bytes == null && file.path != null) {
+        bytes = await io.File(file.path!).readAsBytes();
+      }
+      if (bytes == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se pudo leer el archivo')),
+        );
+        return;
+      }
+
       final processedBytes = await FileUtils.processFile(
-        bytes: file.bytes!,
+        bytes: bytes,
         extension: file.extension ?? '',
         context: context,
       );

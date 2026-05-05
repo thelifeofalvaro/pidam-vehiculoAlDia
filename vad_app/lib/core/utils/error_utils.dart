@@ -1,9 +1,9 @@
-/// Convierte cualquier excepción en un mensaje legible en español.
-/// [contexto] describe la operación que falló. Se incluye en el
-/// mensaje genérico cuando el error no es reconocible.
-/// Ejemplo:
-///   ErrorUtils.mensajeLegible(e, contexto: 'guardar el vehículo')
-///   → "Error al guardar el vehículo. Inténtalo de nuevo."
+// Convierte cualquier excepción en un mensaje legible en español.
+// [contexto] describe la operación que falló. Se incluye en el
+// mensaje genérico cuando el error no es reconocible.
+// Ejemplo:
+//   ErrorUtils.mensajeLegible(e, contexto: 'guardar el vehículo')
+//   → "Error al guardar el vehículo. Inténtalo de nuevo."
 
 class ErrorUtils {
   ErrorUtils._();
