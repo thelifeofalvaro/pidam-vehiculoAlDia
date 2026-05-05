@@ -118,7 +118,9 @@ class _VehicleDetailScreenState extends State<VehicleDetailScreen> {
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image(
-                                image: NetworkImage(vehicle.imageUrl!),
+                                image: NetworkImage(
+                                  '${vehicle.imageUrl!}?t=${DateTime.now().millisecondsSinceEpoch}',
+                                ),
                                 fit: BoxFit.cover,
                               ),
                             )

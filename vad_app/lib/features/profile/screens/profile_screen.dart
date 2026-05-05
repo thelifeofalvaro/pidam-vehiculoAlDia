@@ -236,10 +236,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         bytes = await io.File(file.path!).readAsBytes();
       }
       if (bytes == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo leer el archivo')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se pudo leer el archivo')),
+          );
+        }
         return;
       }
 
@@ -255,13 +256,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final userId = supabase.auth.currentUser!.id;
       final fileName = 'profile_$userId.${file.extension}';
       final path = 'profiles/$fileName';
+      final ext = file.extension?.toLowerCase() ?? 'jpg';
+      final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
       await supabase.storage
           .from(FileUtils.bucket)
           .uploadBinary(
             path,
             processedBytes,
-            fileOptions: const FileOptions(upsert: true),
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
           );
 
       final publicUrl = supabase.storage
@@ -565,7 +568,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   (_profile?.avatarUrl != null &&
                                       _profile!.avatarUrl!.isNotEmpty)
                                   ? DecorationImage(
-                                      image: NetworkImage(_profile!.avatarUrl!),
+                                      image: NetworkImage(
+                                        '${_profile!.avatarUrl!}?t=${DateTime.now().millisecondsSinceEpoch}',
+                                      ),
                                       fit: BoxFit.cover,
                                     )
                                   : null,

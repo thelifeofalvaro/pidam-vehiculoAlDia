@@ -220,12 +220,15 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
 
       final supabase = Supabase.instance.client;
 
+      final ext = file.extension?.toLowerCase() ?? 'jpg';
+      final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
+
       await supabase.storage
           .from('archive')
           .uploadBinary(
             path,
             processedBytes,
-            fileOptions: const FileOptions(upsert: true),
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
           );
 
       final publicUrl = supabase.storage

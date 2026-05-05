@@ -285,13 +285,15 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
       final fileName =
           'vehiculo_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
       final path = 'vehiculos/$fileName';
+      final ext = file.extension?.toLowerCase() ?? 'jpg';
+      final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
       await supabase.storage
           .from('archive')
           .uploadBinary(
             path,
             processedBytes,
-            fileOptions: const FileOptions(upsert: true),
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
           );
 
       final publicUrl = supabase.storage.from('archive').getPublicUrl(path);

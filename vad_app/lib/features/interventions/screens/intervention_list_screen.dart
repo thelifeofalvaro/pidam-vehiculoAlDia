@@ -148,12 +148,19 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
       final supabase = Supabase.instance.client;
 
+      final ext = file.extension?.toLowerCase() ?? 'jpg';
+      final contentType = ext == 'pdf'
+          ? 'application/pdf'
+          : ext == 'png'
+          ? 'image/png'
+          : 'image/jpeg';
+
       await supabase.storage
           .from('archive')
           .uploadBinary(
             path,
             processedBytes,
-            fileOptions: const FileOptions(upsert: true),
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
           );
 
       final publicUrl = supabase.storage
