@@ -219,15 +219,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // Subir foto perfil
   Future<void> _pickAndUploadProfileImage() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final pickerResult = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png'],
         withData: true,
       );
 
-      if (result == null) return;
+      if (pickerResult == null) return;
 
-      final file = result.files.first;
+      final file = pickerResult.files.first;
 
       // En Android los bytes pueden venir nulos aunque withData: true.
       // Se usa file.path como fallback para leerlos desde disco.
@@ -244,13 +244,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-      final processedBytes = await FileUtils.processFile(
+      final result = await FileUtils.processFile(
         bytes: bytes,
         extension: file.extension ?? '',
-        context: context,
       );
 
-      if (processedBytes == null) return;
+      if (!result.isSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result.errorMessage ?? 'Error procesando el archivo',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (result.wasCompressed && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Imagen comprimida: ${result.originalKb}KB → ${result.processedKb}KB',
+            ),
+          ),
+        );
+      }
+
+      final processedBytes = result.bytes!;
 
       final supabase = Supabase.instance.client;
       final userId = supabase.auth.currentUser!.id;
@@ -260,16 +282,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final contentType = ext == 'png' ? 'image/png' : 'image/jpeg';
 
       await supabase.storage
-          .from(FileUtils.bucket)
+          .from('archive')
           .uploadBinary(
             path,
             processedBytes,
             fileOptions: FileOptions(upsert: true, contentType: contentType),
           );
 
-      final publicUrl = supabase.storage
-          .from(FileUtils.bucket)
-          .getPublicUrl(path);
+      final publicUrl = supabase.storage.from('archive').getPublicUrl(path);
 
       await supabase
           .from('usuarios')
@@ -302,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final uri = Uri.parse(_profile!.avatarUrl!);
       final filePath = uri.pathSegments.skip(2).join('/');
 
-      await supabase.storage.from(FileUtils.bucket).remove([filePath]);
+      await supabase.storage.from('archive').remove([filePath]);
 
       final userId = supabase.auth.currentUser!.id;
       await supabase

@@ -248,15 +248,15 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
   /// Si no hay imagen, image_url es null y se muestra el placeholder.
   Future<void> _pickAndUploadImage() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final pickerResult = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'jpeg'],
         withData: true,
       );
 
-      if (result == null) return;
+      if (pickerResult == null) return;
 
-      final file = result.files.first;
+      final file = pickerResult.files.first;
 
       // En Android los bytes pueden venir nulos aunque withData: true.
       // Se usa file.path como fallback para leerlos desde disco.
@@ -273,13 +273,36 @@ class _VehicleManageScreenState extends State<VehicleManageScreen> {
         return;
       }
 
-      final processedBytes = await FileUtils.processFile(
+      final result = await FileUtils.processFile(
         bytes: bytes,
         extension: file.extension ?? '',
-        context: context,
       );
 
-      if (processedBytes == null) return;
+      if (!result.isSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result.errorMessage ?? 'Error procesando el archivo',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Si se comprimió, informar al usuario
+      if (result.wasCompressed && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Imagen comprimida: ${result.originalKb}KB → ${result.processedKb}KB',
+            ),
+          ),
+        );
+      }
+
+      final processedBytes = result.bytes!;
 
       final supabase = Supabase.instance.client;
       final fileName =

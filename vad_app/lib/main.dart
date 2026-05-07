@@ -9,6 +9,7 @@ import 'package:vad_app/data/models/vehicle_model.dart';
 import 'package:vad_app/features/interventions/screens/intervention_list_screen.dart';
 import 'package:vad_app/features/interventions/screens/intervention_manage_screen.dart';
 import 'package:vad_app/core/app_config.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
@@ -17,6 +18,8 @@ import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await FilePicker.clearTemporaryFiles();
 
   // Recogemos las credenciales de Supabase desde AppConfig y las inicializamos
   // Ver lib/core/app_config.dart para más detalles

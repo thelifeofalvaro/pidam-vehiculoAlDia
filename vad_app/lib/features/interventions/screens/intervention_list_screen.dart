@@ -23,6 +23,7 @@ class InterventionListScreen extends StatefulWidget {
 }
 
 class _InterventionListScreenState extends State<InterventionListScreen> {
+  final SupabaseClient supabase = Supabase.instance.client;
   final InterventionRepository _repository = InterventionRepository();
   List<Intervention> interventions = [];
   bool isLoading = true;
@@ -100,42 +101,71 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
 
   Future<void> _pickAndUploadFile(Intervention intervention) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
-        withData: true,
+        withData: true, // Crucial para obtener los bytes en memoria[cite: 5]
       );
 
-      if (result == null) return;
+      if (result == null || result.files.isEmpty) return;
+
+      await Future.delayed(const Duration(milliseconds: 500));
 
       final file = result.files.first;
 
-      final fileBytes = file.bytes;
-      if (fileBytes == null) return;
-
-      if (!mounted) return;
-
-      final processedBytes = await FileUtils.processFile(
-        bytes: fileBytes,
+      // Procesar archivo con tus utilidades
+      final processResult = await FileUtils.processFile(
+        bytes: file.bytes!,
         extension: file.extension ?? '',
-        context: context,
       );
-      if (processedBytes == null) return;
 
-      await _uploadToSupabase(intervention, file, processedBytes);
+      if (!processResult.isSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(processResult.errorMessage ?? 'Error')),
+          );
+        }
+        return;
+      }
+
+      if (!mounted) return; // Brecha asíncrona
+
+      // Subida a Supabase[cite: 2]
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+      final path = 'interventions/$fileName';
+
+      await supabase.storage
+          .from(FileUtils.bucket)
+          .uploadBinary(path, processResult.bytes!);
+
+      final publicUrl = supabase.storage
+          .from(FileUtils.bucket)
+          .getPublicUrl(path);
+
+      // Actualizar la intervención en la base de datos
+      await supabase
+          .from('interventions')
+          .update({'file_url': publicUrl})
+          .eq('id', intervention.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Archivo subido correctamente')),
+        );
+        loadInterventions(); // Recargar lista
+      }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            ErrorUtils.mensajeLegible(e, contexto: 'subir el archivo'),
-          ),
-        ),
-      );
+      debugPrint('DEBUG_ERROR: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al subir: $e')));
+      }
     }
   }
 
-  Future<void> _uploadToSupabase(
+  Future<void> uploadToSupabase(
     Intervention intervention,
     PlatformFile file,
     Uint8List processedBytes,
@@ -163,9 +193,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
             fileOptions: FileOptions(upsert: true, contentType: contentType),
           );
 
-      final publicUrl = supabase.storage
-          .from(FileUtils.bucket)
-          .getPublicUrl(path);
+      final publicUrl = supabase.storage.from('archive').getPublicUrl(path);
 
       /// Guardar URL en la intervención
       await _repository.updateIntervention(
@@ -632,9 +660,7 @@ class _InterventionListScreenState extends State<InterventionListScreen> {
                       final uri = Uri.parse(intervention.urlAdjunto!);
                       final filePath = uri.pathSegments.skip(2).join('/');
 
-                      await supabase.storage.from(FileUtils.bucket).remove([
-                        filePath,
-                      ]);
+                      await supabase.storage.from('archive').remove([filePath]);
 
                       await _repository.updateIntervention(
                         intervention.copyWith(urlAdjunto: null),
