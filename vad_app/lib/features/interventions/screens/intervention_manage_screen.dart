@@ -9,6 +9,7 @@ import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
 import 'package:vad_app/core/utils/error_utils.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
@@ -194,9 +195,9 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
 
       final file = pickerResult.files.first;
 
-      // Fallback Android: file.bytes puede ser null aunque withData: true
+      // Fallback Android, diferenciado de web
       Uint8List? fileBytes = file.bytes;
-      if (fileBytes == null && file.path != null) {
+      if (fileBytes == null && !kIsWeb && file.path != null) {
         fileBytes = await io.File(file.path!).readAsBytes();
       }
       if (fileBytes == null) {
