@@ -1,3 +1,6 @@
+import 'dart:io' as io;
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
@@ -5,15 +8,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vad_app/core/app_color.dart';
 import 'package:vad_app/core/app_text_styles.dart';
 import 'package:vad_app/core/utils/file_utils.dart';
+import 'package:vad_app/core/utils/error_utils.dart';
 
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/intervention_model.dart' as model;
 import '../../../data/repositories/intervention_repository.dart';
 
-/// Pantalla de alta y edición de intervenciones.
-/// Funciona en dos modos según el argumento de navegación:
-/// - Vehicle → modo creación (nueva intervención para ese vehículo)
-/// - Intervention → modo edición (campos pre-rellenos)
+// Pantalla de alta y edición de intervenciones.
+// Funciona en dos modos según el argumento de navegación:
+// - Vehicle → modo creación (nueva intervención para ese vehículo)
+// - Intervention → modo edición (campos pre-rellenos)
 
 class InterventionManageScreen extends StatefulWidget {
   const InterventionManageScreen({super.key});
@@ -24,7 +28,6 @@ class InterventionManageScreen extends StatefulWidget {
 }
 
 class _InterventionManageScreenState extends State<InterventionManageScreen> {
-  final supabase = Supabase.instance.client;
   final repo = InterventionRepository();
 
   // Controllers
@@ -33,7 +36,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
   final notasController = TextEditingController();
   final descripcionController = TextEditingController();
 
-  //Variables de estado
+  // State variables
   String? lugarSeleccionado;
   String? tipoSeleccionado;
   DateTime? fechaSeleccionada;
@@ -55,14 +58,12 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     super.didChangeDependencies();
     argumentos = ModalRoute.of(context)!.settings.arguments;
 
-    // Ver si es edición o creación de intervención.
+    // Ver si se edita o se crea la intervención
     if (argumentos is model.Intervention) {
-      // Edición, se recibe pantalla con datos
       interventionToEdit = argumentos as model.Intervention;
       isEditing = true;
       _fillFormWithIntervention(interventionToEdit!);
     } else if (argumentos is Vehicle) {
-      // Creación, recibe pantalla vacia
       vehicle = argumentos as Vehicle;
       isEditing = false;
     }
@@ -80,56 +81,6 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     documentoAdjunto = intervention.urlAdjunto;
   }
 
-  /// El documento adjunto se sube a Storage antes de llamar a save().
-  /// Su URL pública se almacena en url_adjunto de la tabla intervenciones.
-  Future<void> _pickAndUploadFile() async {
-    try {
-      final result = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
-        withData: true,
-      );
-
-      if (result == null || result.files.isEmpty) return;
-
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      final file = result.files.first;
-
-      final processResult = await FileUtils.processFile(
-        bytes: file.bytes!,
-        extension: file.extension ?? '',
-      );
-
-      if (!processResult.isSuccess || !mounted) return;
-
-      final fileName =
-          'doc_${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
-      final path = 'interventions/$fileName';
-
-      await supabase.storage
-          .from(FileUtils.bucket)
-          .uploadBinary(path, processResult.bytes!);
-
-      final publicUrl = supabase.storage
-          .from(FileUtils.bucket)
-          .getPublicUrl(path);
-
-      setState(() {
-        documentoAdjunto = publicUrl;
-      });
-    } catch (e) {
-      debugPrint('Error subida: $e');
-    }
-  }
-
-  /// La función de borrado elimina el archivo adjunto y actualiza el estado.
-  void _deleteFile() {
-    setState(() {
-      documentoAdjunto = null;
-    });
-  }
-
   Future<void> selectDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
@@ -138,9 +89,7 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      setState(() {
-        fechaSeleccionada = picked;
-      });
+      setState(() => fechaSeleccionada = picked);
     }
   }
 
@@ -173,55 +122,398 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
       } else {
         await repo.createIntervention(intervention);
       }
-
       if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
-      debugPrint('Error al guardar: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'guardar la intervención'),
+          ),
+        ),
+      );
     }
+  }
+
+  Future<void> delete() async {
+    if (!isEditing || interventionToEdit == null) return;
+
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar intervención'),
+        content: const Text(
+          '¿Estás seguro de que quieres eliminar esta intervención?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) {
+      try {
+        await repo.deleteIntervention(interventionToEdit!.id);
+        if (!mounted) return;
+        Navigator.pop(context, true);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ErrorUtils.mensajeLegible(
+                e,
+                contexto: 'eliminar la intervención',
+              ),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  // El documento adjunto se sube a Storage antes de llamar a save().
+  // Su URL pública se almacena en url_adjunto de la tabla intervenciones.
+  Future<void> _pickAndUploadFile() async {
+    try {
+      final pickerResult = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        withData: true,
+      );
+
+      if (pickerResult == null) return;
+
+      final file = pickerResult.files.first;
+
+      // Fallback Android: file.bytes puede ser null aunque withData: true
+      Uint8List? fileBytes = file.bytes;
+      if (fileBytes == null && file.path != null) {
+        fileBytes = await io.File(file.path!).readAsBytes();
+      }
+      if (fileBytes == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No se pudo leer el archivo')),
+          );
+        }
+        return;
+      }
+
+      final result = await FileUtils.processFile(
+        bytes: fileBytes,
+        extension: file.extension ?? '',
+      );
+
+      if (!result.isSuccess) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result.errorMessage ?? 'Error procesando el archivo',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (result.wasCompressed && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Imagen comprimida: ${result.originalKb}KB → ${result.processedKb}KB',
+            ),
+          ),
+        );
+      }
+
+      final processedBytes = result.bytes!;
+      final supabase = Supabase.instance.client;
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}.${file.extension}';
+      final path = 'interventions/$fileName';
+      final ext = file.extension?.toLowerCase() ?? 'jpg';
+      final contentType = ext == 'pdf'
+          ? 'application/pdf'
+          : ext == 'png'
+          ? 'image/png'
+          : 'image/jpeg';
+
+      await supabase.storage
+          .from(FileUtils.bucket)
+          .uploadBinary(
+            path,
+            processedBytes,
+            fileOptions: FileOptions(upsert: true, contentType: contentType),
+          );
+
+      final publicUrl = supabase.storage
+          .from(FileUtils.bucket)
+          .getPublicUrl(path);
+
+      if (!mounted) return;
+      setState(() => documentoAdjunto = publicUrl);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Archivo subido correctamente')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'subir el archivo'),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteFile() async {
+    try {
+      if (documentoAdjunto == null) return;
+
+      final supabase = Supabase.instance.client;
+      final uri = Uri.parse(documentoAdjunto!);
+      final filePath = uri.pathSegments.skip(2).join('/');
+
+      await supabase.storage.from(FileUtils.bucket).remove([filePath]);
+
+      setState(() => documentoAdjunto = null);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Archivo eliminado')));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ErrorUtils.mensajeLegible(e, contexto: 'eliminar el archivo'),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    kmController.dispose();
+    costeController.dispose();
+    notasController.dispose();
+    descripcionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.cardWhite,
       appBar: AppBar(
-        title: Text(isEditing ? 'Editar Intervención' : 'Nueva Intervención'),
-        actions: [IconButton(onPressed: save, icon: const Icon(Icons.check))],
+        backgroundColor: AppColors.cardWhite,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left, color: AppColors.primaryBlue),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          isEditing ? 'Editar Intervención' : 'Nueva Intervención',
+          style: AppTextStyles.heading2,
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildDatePicker(),
-            const SizedBox(height: 16),
-            _buildFileUploadField(),
-            const SizedBox(height: 16),
-            _buildNotesField(),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Column(
+            children: [
+              // Selector Lugar Intervención
+              _buildDropdownField(
+                label: 'Casa o Taller',
+                value: lugarSeleccionado,
+                items: lugares,
+                onChanged: (v) => setState(() => lugarSeleccionado = v),
+              ),
+              const SizedBox(height: 21),
+
+              // Kilometraje actual
+              _buildTextField(
+                controller: kmController,
+                label: 'Kilometraje actual',
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 21),
+
+              // Tipo de Intervención
+              _buildDropdownField(
+                label: 'Tipo de Intervención',
+                value: tipoSeleccionado,
+                items: tipos,
+                onChanged: (v) => setState(() => tipoSeleccionado = v),
+              ),
+              const SizedBox(height: 21),
+
+              // Descripción
+              _buildTextField(
+                controller: descripcionController,
+                label: 'Descripción',
+              ),
+              const SizedBox(height: 21),
+
+              // Coste
+              _buildTextField(
+                controller: costeController,
+                label: 'Coste (€)',
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 21),
+
+              // Fecha
+              _buildDateField(),
+              const SizedBox(height: 21),
+
+              // Adjuntar Documento
+              _buildFileUploadField(),
+              const SizedBox(height: 21),
+
+              // Notas
+              _buildNotesField(),
+              const SizedBox(height: 32),
+
+              // Botón Guardar
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.actionOrange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Guardar Intervención',
+                    style: AppTextStyles.button,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Botón Eliminar (solo en modo edición)
+              if (isEditing)
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: delete,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.errorRed,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Eliminar Intervención',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.cardWhite,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // 4. WIDGETS DE LA UI (Corregidos cierres de paréntesis)
-  Widget _buildDatePicker() {
+  Widget _buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.cloudWhite,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonFormField<String>(
+        initialValue: value,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: label,
+          labelStyle: AppTextStyles.heading3,
+        ),
+        items: items
+            .map(
+              (item) =>
+                  DropdownMenuItem<String>(value: item, child: Text(item)),
+            )
+            .toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppColors.cloudWhite,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: label,
+          labelStyle: AppTextStyles.heading3,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
     return GestureDetector(
       onTap: () => selectDate(context),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.cloudWhite,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today, size: 24),
+            const Icon(
+              Icons.calendar_today,
+              color: AppColors.carbonBlack,
+              size: 24,
+            ),
             const SizedBox(width: 10),
             Text(
               fechaSeleccionada != null
                   ? DateFormat('dd/MM/yyyy').format(fechaSeleccionada!)
-                  : 'Seleccionar Fecha',
-              style: AppTextStyles.bodyMedium,
+                  : 'Fecha',
+              style: AppTextStyles.heading3,
             ),
           ],
         ),
@@ -233,22 +525,13 @@ class _InterventionManageScreenState extends State<InterventionManageScreen> {
     final hasFile = documentoAdjunto != null && documentoAdjunto!.isNotEmpty;
 
     return GestureDetector(
-      onTap: () {
-        if (hasFile) {
-          _deleteFile();
-        } else {
-          _pickAndUploadFile();
-        }
-      },
+      onTap: () => hasFile ? _deleteFile() : _pickAndUploadFile(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.cloudWhite,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: hasFile ? AppColors.errorRed : Colors.transparent,
-            width: 1.5,
-          ),
+          border: Border.all(color: AppColors.cloudWhite, width: 1.5),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
