@@ -6,8 +6,6 @@ Desarrollada con **Flutter, Dart, Supabase y PostgreSQL**, permite a cada usuari
 
 > Proyecto final del CFGS en Desarrollo de Aplicaciones Multiplataforma (DAM).
 
----
-
 ## 📱 Sobre el proyecto
 
 **Vehículo al Día** nace con un objetivo sencillo: facilitar a los usuarios particulares el seguimiento del mantenimiento y las intervenciones realizadas en sus vehículos.
@@ -27,8 +25,6 @@ Al estar desarrollada con Flutter, la misma base de código permite ejecutar la 
                      └── Documentos
 
 Cada usuario gestiona únicamente sus propios vehículos e intervenciones.
-
----
 
 ## ✨ Funcionalidades
 
@@ -69,8 +65,6 @@ Cada usuario gestiona únicamente sus propios vehículos e intervenciones.
 - Compresión automática de imágenes que superen 1 MB.
 - Almacenamiento mediante Supabase Storage.
 
----
-
 ## 🔐 Seguridad y datos
 
 La aplicación utiliza **Supabase** como backend y **PostgreSQL** como sistema gestor de base de datos.
@@ -80,8 +74,6 @@ La seguridad de los datos se basa en **Row Level Security (RLS)**, de forma que 
 La autenticación se gestiona mediante **Supabase Auth**, integrada con el modelo de datos de la aplicación.
 
 Las credenciales de Supabase se proporcionan mediante `dart_defines.json`, incluido en `.gitignore`, por lo que no se almacenan en el repositorio.
-
----
 
 ## 🏗️ Arquitectura
 
@@ -123,15 +115,12 @@ Pantallas y widgets compartidos utilizados por diferentes funcionalidades.
 
 La gestión de estados se realiza mediante el mecanismo nativo `setState` de Flutter.
 
----
-
+```
 ## 🖼️ Aplicación
 
 <!-- Añadir aquí las capturas reales de la aplicación -->
-
----
-
-## 🛠️ Stack tecnológico
+```
+## 🛠️ Stack tecnológico 
 
 ### Aplicación
 
@@ -152,7 +141,6 @@ La gestión de estados se realiza mediante el mecanismo nativo `setState` de Flu
 - `intl` — formatos de fecha e internacionalización.
 - `flutter_locations` — localización en español.
 
----
 
 ## 📂 Estructura del repositorio
 
@@ -196,8 +184,6 @@ La carpeta `docs/` contiene documentación y diagramas del proyecto, incluyendo:
 
 La carpeta `database/` contiene los scripts SQL utilizados para crear y modificar el esquema, configurar las políticas RLS e integrar la autenticación.
 
----
-
 ## 🚀 Instalación y configuración
 
 ### Requisitos
@@ -231,23 +217,17 @@ Mi archivo no está subido al repositorio.
 
     flutter run --dart-define-from-file=dart_defines.json
 
----
-
 ## 📚 Documentación adicional
 
 - [`database/database.md`](database/database.md) — esquema de la base de datos, políticas RLS e integración con Supabase Auth.
 - [`docs/supabase/supabase.md`](docs/supabase/supabase.md) — configuración de Supabase, Storage y despliegue.
 - [`docs/diagramas/`](docs/diagramas/) — diagramas técnicos del proyecto.
 
----
-
 ## 📌 Estado
 
 **Completado.**
 
 Proyecto desarrollado como parte del **CFGS en Desarrollo de Aplicaciones Multiplataforma (DAM)**.
-
----
 
 ## 👤 Autor
 
